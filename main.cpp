@@ -1,4 +1,8 @@
+#include "interface.hpp"
 #include "closed_form.hpp"
+#include "payoff.hpp"
+#include "pde.hpp"
+
 
 // Guidelines:
 //
