@@ -15,7 +15,7 @@ namespace dauphine
 		//Logique de sémantique d'entité car payoff different pour chaque option
 	{
 		public: //Constructeurs et destructeurs virtuels
-			//virtual payoff() const =0;
+			payoff() const =0; //explicit?
 			virtual ~payoff();
 			virtual double operator payoff() (const double S) const;
     };
@@ -29,6 +29,7 @@ namespace dauphine
 		 	~payoff();
 			double operator payoff() (const double S) const override; 
 			//Surchage de () pour calculer payoff
+			//verifier syntaxe
     };
 
 	class put:public payoff
