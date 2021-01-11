@@ -6,7 +6,12 @@
 
 namespace dauphine
 {
-	payoff:payoff() const //Nécessaire? et les destructeurs aussi?
+
+	payoff:payoff()
+	{
+	}
+
+	payoff::~payoff()
 	{
 	}
 
