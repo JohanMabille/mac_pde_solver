@@ -16,16 +16,17 @@ namespace dauphine
 		public: 
 			payoff* payoff;
 
-			const double strike;
-			const double rate;
+			//const double strike; //utile pour des options plus complexes?
+			const double rate; //a adapter
 			const double maturity;
-			const double vol;
+			const double vol; //a adapter
+
 			const double theta;
-			const double mesh;
+			const double mesh; //necessaire?
 						
 			
 			interface();
-			interface(double K, double r, double T, double sig, payoff* pay);
+			interface(/*double K,*/ double r, double T, double sig, payoff* pay);
 			~interface();
 	
 	}

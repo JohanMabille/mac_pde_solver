@@ -10,8 +10,8 @@ namespace dauphine
 	{
 	}
 
-	interface::interface(double K, double r, double T, double sig, payoff* pay):
-		: K(strike), r(rate), T(maturity), sig(vol), pay(payoff)
+	interface::interface(/*double K,*/ double r, double T, double sig, payoff* pay):
+		: /*K(strike),*/ r(rate), T(maturity), sig(vol), pay(payoff)
 	{
 	}
 
