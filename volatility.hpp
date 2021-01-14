@@ -13,21 +13,27 @@
 namespace dauphine
 {
 
-class volatility
-{
+    class volatility
+    {
+        public:
+        //ajouter constructeur
+        virtual ~volatility();
+        virtual double get_sigma(double s, double t) const = 0; // à quoi ça sert ?
+        
+    };
+
+
+    class vol_cst: public volatility
+    {
+    private:
+        double sigma;
+        
     public:
-    virtual ~volatility();
-    virtual double sigma(double s, double t) = 0;
-    
-}
+        vol_cst(double initial_sigma);
+        ~vol_cst();
+        double get_sigma(double s, double t) const override; // à quoi ça sert ?
 
-
-class vol_cst: public volatility{
-private:
-    double sigma = 0;
-public:
-    vol_cst(double initial_sigma);
-    double sigma(double s, double t);
+    };
 
 }
 

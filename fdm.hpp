@@ -63,10 +63,11 @@ namespace dauphine
 			double lN;
 	
 	
-	}
+    };
 
 
 
 
 }
 
+#endif

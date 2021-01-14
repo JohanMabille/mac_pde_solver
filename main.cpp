@@ -2,6 +2,10 @@
 #include "closed_form.hpp"
 #include "payoff.hpp"
 #include "pde.hpp"
+#include "pde_boundary_conditions.hpp"
+#include "fdm.hpp"
+#include "rate.hpp"
+// #include "volatility.hpp"
 
 
 // Guidelines:
@@ -17,14 +21,38 @@
 // The pricer should ask the coefficients a, b, c and d to an
 // abstract class that will be inherited by classes implementing
 // different models.
-// 
+//
 // 2] Payoff
 // The pricer should be able to price exotic options, such as
 // barriers or asian options. To do so, the pricer must be able
 // to call an external function between each step. Define an API
 // that allows to register a function or an abstract class modeling
 // a payoff.
+
+
+namespace dauphine {
+
+    void test_interface()
+    {
+        payoff* c1 = new call(100.);
+        interface* market = new interface(0.05, 2, 0.16, c1);
+        
+        
+        
+        
+        delete market;
+        delete c1;
+    }
+
+}
+
+
+
 int main(int argc, const char * argv[])
 {
+    dauphine::test_interface();
     return 0;
 }
+
+
+

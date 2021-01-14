@@ -13,22 +13,25 @@
 namespace dauphine
 {
 
-class rate
-{
+    class rate
+    {
+        public:
+        virtual ~rate();
+        virtual double r(double s, double t) = 0;
+        
+    };
+
+
+    class rate_cst: public rate
+    {
+    private:
+        double rate = 0;
+        
     public:
-    virtual ~rate();
-    virtual double r(double s, double t) = 0;
-    
+        rate_cst(double initial_sigma);
+        double r(double s, double t);
+    };
 }
-
-
-class rate_cst: public rate{
-private:
-    double rate = 0;
-public:
-    rate_cst(double initial_sigma);
-    double r(double s, double t);
-
 
 
 #endif /* rate_hpp */
