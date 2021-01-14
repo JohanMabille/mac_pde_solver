@@ -6,16 +6,35 @@
 
 namespace dauphine
 {
-	interface::interface()
+	interface::interface() //Nécessaire?
 	{
 	}
 
 	interface::interface(/*double K,*/ double r, double T, double sig, payoff* pay):
-		: /*K(strike),*/ r(rate), T(maturity), sig(vol), pay(payoff)
+		: /*K(strike),*/ rate(r), maturity(T), vol(sig), payoff(pay)
 	{
+        std::cout<<"interface constructor"<<std::endl;
 	}
 
-	interface::~interface() //Nécessaire?
+	interface::~interface()
+
+    const double interface::get_rate() const
+    {
+        std::cout<<"interface::get_rate()"<<std::endl;
+        return rate;
+    }
+    
+    const double interface::get_maturity() const
+    {
+        std::cout<<"interface::get_mat()"<<std::endl;
+        return maturity;
+    }
+    
+    const double interface::get_vol() const
+    {
+        std::cout<<"interface::get_vol()"<<std::endl;
+        return vol;
+    }
 
 }
 
