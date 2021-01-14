@@ -9,30 +9,46 @@ namespace dauphine
 
 	payoff:payoff()
 	{
+        std::cout<< "payoff constructor" << std::endl;
 	}
 
 	payoff::~payoff()
 	{
+        std::cout<< "payoff destructor" << std::endl;
 	}
 
-	call::payoff(const double K) const 
+	call::call(const double K) const
+		: strike(K)
+	{
+        std::cout<< "call consructor" << std::endl;
+	}
+
+    call::~call()
+    {
+        strike = 0;
+        std::cout<< "call destructor" << std::endl;
+    }
+
+	double call::get_payoff() (const double S) const
+	{
+		return std::max(S-K, 0);
+	}
+
+	put::put(const double K) const
 		: K(strike)
 	{
+        std::cout<< "put constructor" << std::endl;
 	}
 
-	double call::operator payoff() (const double S) const
-	{
-		retunr std::max(S-K, 0);
-	}
+    put::~put()
+    {
+        strike = 0;
+        std::cout<< "put destructor" << std::endl;
+    }
 
-	put::payoff(const double K) const
-		: K(strike)
+	double put::get_payoff() (const double S) const
 	{
-	}
-
-	double put::operator payoff() (const double S) const
-	{
-		retunr std::max(K-S, 0);
+		return std::max(K-S, 0);
 	}
 
 	

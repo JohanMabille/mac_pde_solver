@@ -18,9 +18,9 @@ namespace dauphine
         interface(/*double K,*/ double r, double T, double sig, payoff* pay);
         ~interface();
         
-        const double get_rate() const;
-        const double get_maturity() const;
-        const double get_vol() const;
+        double get_rate() const;
+        double get_maturity() const;
+        double get_vol() const;
 	
         
     private:
@@ -33,7 +33,9 @@ namespace dauphine
 
         const double theta;
         const double mesh; //necessaire?
-	}
+    };
 
 }
+
+#endif
 
