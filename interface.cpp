@@ -11,7 +11,7 @@ namespace dauphine
 	}
 
 	interface::interface(/*double K,*/ double r, double T, double sig, payoff* pay):
-		: /*K(strike),*/ rate(r), maturity(T), vol(sig), payoff(pay)
+		: /*K(strike),*/ m_rate(r), maturity(T), m_vol(sig), payoff(pay)
 	{
         std::cout<<"interface constructor"<<std::endl;
 	}
@@ -35,6 +35,5 @@ namespace dauphine
         std::cout<<"interface::get_vol()"<<std::endl;
         return vol;
     }
-
 }
 
