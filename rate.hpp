@@ -23,7 +23,7 @@ namespace dauphine
         
     public:
         rate_cst(double initial_sigma);
-       	double r(double s, double t); //?
+       	double r(double s, double t); //????
     };
 }
 

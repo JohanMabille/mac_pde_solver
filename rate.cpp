@@ -30,7 +30,7 @@ namespace dauphine{
 		std::cout << "destructeur rate cst" << std::endl;
 	}
 
-	rate_cst::r(double s, double t) //?
+	rate_cst::r(double s, double t) //????
 	{
     		return rate;
 	}
