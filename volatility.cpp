@@ -1,27 +1,40 @@
-//
-//  volatility.cpp
-//  mac_pde_solver
-//
-//  Created by Meriem Hrittane on 11/01/2021.
-//
+#include <string>
+#include <vector>
+#include <iostream>
+#include <cmath>
+#include <numeric>
+#include <functional>
 
 #include "volatility.hpp"
-namespace dauphine{
-
-volatility::~volatility()
+namespace dauphine
 {
-}
+	
+	volatility::volatility()
+	{
+		std::cout << "constructeur vol" << std::endl;
+	}
+	
+	volatility::~volatility()
+	{
+		std::cout << "destructeur vol" << std::endl;
+	}
 
 
+	vol_cst::vol_cst(const double initial_sigma)
+		: sigma(initial_sigma)
+	{
+       		std::cout << "constructeur vol cst" << std::endl;
+    	}
 
-vol_cst::vol_cst(double initial_sigma){
-        sigma = initial_sigma;
-    }
+	vol_cst::~vol_cst
+	{
+		std::cout << "destructeur vol cst" << std::endl;
+	}
 
-vol_cst::sigma(double s, double t)
-{
-    return sigma;
-}
+	vol_cst::get_sigma() const
+	{
+    		return sigma;
+	}
 
 }
 

@@ -1,24 +1,38 @@
-//
-//  rate.cpp
-//  mac_pde_solver
-//
-//  Created by Meriem Hrittane on 11/01/2021.
-//
-
+#include <string>
+#include <vector>
+#include <iostream>
+#include <cmath>
+#include <numeric>
+#include <functional>
+#include <stdio.h>
 #include "rate.hpp"
+
 namespace dauphine{
 
-rate::~rate()
-{
-}
+	rate::rate()
+	{
+		std::cout << "constructeur rate" << std::endl;
+	}
 
-rate_cst::rate_cst(double initial_rate){
-        rate = initial_rate;
-    }
+	rate::~rate()
+	{
+		std::cout << "destructeur rate" << std::endl;
+	}
 
-vol_cst::r(double s, double t)
-{
-    return rate;
-}
+	rate_cst::rate_cst(double initial_rate)
+		: rate(initial_rate)
+	{
+        	std::cout << "constructeur rate cst" << std::endl;
+    	}
+
+	rate_cst::~rate_cst
+	{
+		std::cout << "destructeur rate cst" << std::endl;
+	}
+
+	rate_cst::r(double s, double t) //????
+	{
+    		return rate;
+	}
 
 }
