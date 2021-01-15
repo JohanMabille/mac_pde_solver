@@ -23,7 +23,7 @@ namespace dauphine
         std::cout<< "call constructor" << std::endl;
 	}
 
-    call::~call()
+    	call::~call()
     	{
         strike = 0;
         std::cout<< "call destructor" << std::endl;

@@ -17,97 +17,82 @@ namespace dauphine
 	{
 	}
 
-	double fdm_interface::alpha(const double dx, const double sig) const //Remplacer par le coeff de pde?
-	{
-		return -0.5*sig**2*1/(dx**2);
-	}
-
-	double fdm_interface::beta(const double dx, const double sig, const double r) const  //Remplacer par le coeff de pde? Pareil pour r, via pointeur sur option? cas non cst?
-
-	{
-		return (-0.5*sig**2 - r)*1/(2*dx);
-	}
-
-	double fdm_interface::a1(const double theta, const double dt, const double dx, const double sig, const double r) const
-	{
-		double alpha =alpha(dx, sig);
-		double beta=beta(dx, sig, r);
+	double fdm_interface::a1(pde* pde) const
+	{		
+		double alpha = (pde->first_coeff())/(dx**2);
+		double beta=(pde->conv_coeff())/(2*dx);
 		
 		return dt*(1-theta)*(beta-alpha);
 	}
 
-	double fdm_interface::a2(const double theta, const double dt, const double dx, const double sig, const double r) const
+	double fdm_interface::a2(pde* pde) const
 	{
-		double alpha =alpha(dx, sig);
-			
+		double alpha = (pde->first_coeff())/(dx**2);
 		return (1- (1-theta)*dt*(r - 2*alpha));
 	}
 
-	double fdm_interface::a3(const double theta, const double dt, const double dx, const double sig, const double r) const
+	double fdm_interface::a3(pde* pde) const
 	{
-		double alpha =alpha(dx, sig);
-		double beta=beta(dx, sig, r);
+		double alpha = (pde->first_coeff())/(dx**2);
+		double beta=(pde->conv_coeff())/(2*dx);
 		
 		return (-dt*(1-theta)*(beta+alpha));
 	}
 
-	double fdm_interface::b1(const double theta, const double dt, const double dx, const double sig, const double r) const
+	double fdm_interface::b1(pde* pde) const
 	{
-		double alpha =alpha(dx, sig);
-		double beta=beta(dx, sig, r);
+		double alpha = (pde->first_coeff())/(dx**2);
+		double beta=(pde->conv_coeff())/(2*dx);
 		
 		return dt*theta*(alpha - beta);
 	}
 
-	double fdm_interface::b2(const double theta, const double dt, const double dx, const double sig, const double r) const
+	double fdm_interface::b2(pde* pde) const
 	{
-		double alpha =alpha(dx, sig);
+		double alpha = (pde->first_coeff())/(dx**2);
 			
 		return (1- theta*dt*(r - 2*alpha));
 	}
 
-	double fdm_interface::b3(const double theta, const double dt, const double dx, const double sig, const double r) const
+	double fdm_interface::b3(pde* pde) const
 	{
-		double alpha =alpha(dx, sig);
-		double beta=beta(dx, sig, r);
-		
+		double alpha = (pde->first_coeff())/(dx**2);
+		double beta=(pde->conv_coeff())/(2*dx);
+
 		return dt*theta*(beta+alpha);
 	}
 
-	fdm::fdm(pde* pde, const double f0, const double fN, const double lower_T, const double upper_T, const double lower_N, const double upper_N)
-		:pde(pd_e), f0(boundary_f0), fN(boundary_fN), lower_T(lT), upper_T(uT), lower_N(lN), upper_N(uN)
+	fdm::fdm(pde* pde, payoff* payoff, const double f0, const double fN, const double lower_T, const double upper_T, const double lower_N, const double upper_N)
+		:m_pde(pde), m_payoff(payoff), boundary_f0(f0), boundary_fN(fN), lT(lower_T), uT(upper_T), lN(lower_N), uN(upper_N), m_dt(dt), m_dx(dx)
 	{
-		//Lien avec PDE??
 		
 		//Calcul avec FDM
 		//1. On discretise le temps et l'espace
-		std::vector<double> dt = time_mesh(lower_T, upper_T); //=1 ? //Pb avec la fonction definie
-		std::vector<double> dN = space_mesh(lower_N, upper_N); //ou direct en arguments?
-		
-		//2. Calcul des f intermédiaires
-		//Calcul du nb de steps en tps et en espace: T et N
+		//ajouter dt et dx en argument
+		//std::vector<double> liste_t = time_mesh(lower_T, upper_T); // Utile ?
+		//std::vector<double> liste_S = space_mesh(lower_N, upper_N); 	
+
 		T = floor((upper_T-lower_T)/dt);
 		N = floor((upper_N-lower_N)/dt);
-
-	//	std::vector<double> f_N = std::fill(1,N-1,fN); //Boundary condition at t=T
-		//Necessaire?					
-	//	std::vector<double> f_0 = std::fill(1,N-1,f0); 
+	
+		//2. Calcul des f intermédiaires
+		//Calcul du nb de steps en tps et en espace: T et N
 		
 		//Calcul de la matrice F en T
-		std::vector<double> F = std::fill(1,N-1,Payoff); //Recupérer le payoff
-
+		std::vector<double> F = std::fill(1,N-1, payoff);
 
 		//Calcul des coeffs des matrices tridiagonales
-		a1 = a1(theta, dt, dx, sig, r); //comment on récupère le r et sig? via pde*?
-		a2 = a2(theta, dt, dx, sig, r);
-		a3 = a3(theta, dt, dx, sig, r);
-		b1 = b1(theta, dt, dx, sig, r);
-		b2 = b2(theta, dt, dx, sig, r);
-		b3 = b3(theta, dt, dx, sig, r);
+		a1 = a1(pde); 
+		a2 = a2(pde);
+		a3 = a3(pde);
+		b1 = b1(pde);
+		b2 = b2(pde);
+		b3 = b3(pde);
 
 		//Calcul du terme constant que l'on extrait pour avoir une matrice tridiagonale
 		std::vector<double> c = std::fill(1, N-1, 0); 
-		c[0]= (a1 - b1*exp(-r*dt))*f0; //meme pb pour r
+		r = pde->zero_coeff()
+		c[0]= (a1 - b1*exp(-r*dt))*f0; 
 		c[N-2]= (a3 - b3*exp(-r*dt))*f0; 
 
 		//Calcul de la matrice D en T
@@ -121,11 +106,11 @@ namespace dauphine
 
 		//On remonte via l'algorithme de Thomas
 		std::vector<double> coeffs = std::fill(0,2,0);
-		coeffs[0] = a1;
-		coeffs[1] = a1;	
-		coeffs[2] = a3;
+		coeffs[0] = b1;
+		coeffs[1] = b2;	
+		coeffs[2] = b3;
 
-		for (int t = T-1; t<=0 ; t--)
+		for (int t = T-1; t>=0 ; t--)
 		{
 			//Pour chaque x(i,t+1), en commencant par f_N, on remonte à x(i,t)
 			//via l'algo de Thomas et le système trouvé
@@ -142,7 +127,7 @@ namespace dauphine
 			}
 		}
 
-		return F;
+		return F[floor(N/2)];
 	}
 
 	
@@ -213,10 +198,5 @@ namespace dauphine
 
 		return x;
 	}
-
-
-
-
-
 
 }
