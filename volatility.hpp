@@ -1,13 +1,12 @@
-//
-//  volatility.hpp
-//  mac_pde_solver
-//
-//  Created by Meriem Hrittane on 11/01/2021.
-//
-
 #ifndef volatility_hpp
 #define volatility_hpp
 
+#include <string>
+#include <vector>
+#include <iostream>
+#include <cmath>
+#include <numeric>
+#include <functional>
 #include <stdio.h>
 
 namespace dauphine
@@ -15,10 +14,10 @@ namespace dauphine
 
     class volatility
     {
-        public:
-        //ajouter constructeur
+    public:
+	explicit volatility();
         virtual ~volatility();
-        virtual double get_sigma(double s, double t) const = 0; // à quoi ça sert ?
+        virtual double get_sigma() const = 0; // à quoi ça sert ?
         
     };
 
@@ -29,12 +28,12 @@ namespace dauphine
         double sigma;
         
     public:
-        vol_cst(double initial_sigma);
+        vol_cst(double initial_sigma const);
         ~vol_cst();
-        double get_sigma(double s, double t) const override; // à quoi ça sert ?
+        double get_sigma() const override; // à quoi ça sert ?
 
     };
 
 }
 
-#endif /* volatility_hpp */
+#endif
