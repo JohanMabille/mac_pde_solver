@@ -18,8 +18,8 @@ namespace dauphine
 			fdm_interface(); //explict?
 			virtual ~fdm_interface();
 
-			virtual double time_mesh(const double lower_T, const double upper_T, const int nb_steps) const = 0; //utile?
-			virtual double space_mesh(const double lower_T, const double upper_T, const int nb_steps) const = 0;
+			virtual std::vector<double> time_mesh(const double lower_T, const double upper_T, const int nb_steps) const = 0; //utile?
+			virtual std::vector<double> space_mesh(const double lower_T, const double upper_T, const int nb_steps) const = 0;
 
 			virtual double a1(pde* pde) const;
 			virtual double a2(pde* pde) const;
@@ -27,7 +27,19 @@ namespace dauphine
 			virtual double b1(pde* pde) const;
 			virtual double b2(pde* pde) const;
 			virtual double b3(pde* pde) const;			
-
+    protected:
+        pde* m_pde;
+        payoff* m_payoff;
+        rate* r;
+        double boundary_f0;
+        double boundary_fN;
+        double uT;
+        double lT;
+        double uN;
+        double lN;
+        int m_dt = 1;
+        int m_dx;
+        double theta; 
 	};
 	
 	class fdm : public fdm_interface
@@ -43,17 +55,7 @@ namespace dauphine
 	
 
 		private:
-			pde* m_pde;
-			payoff* m_payoff
-			double boundary_f0;
-			double boundary_fN;
-			double uT;
-			double lT;
-			double uN;
-			double lN;
-			int m_dt = 1; 
-			int m_dx; 
-			double theta; 
+			
 	
 	
     };

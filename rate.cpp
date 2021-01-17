@@ -25,14 +25,14 @@ namespace dauphine{
         	std::cout << "constructeur rate cst" << std::endl;
     	}
 
-	rate_cst::~rate_cst
+	/*rate_cst::~rate_cst()
 	{
 		std::cout << "destructeur rate cst" << std::endl;
-	}
+	}*/
 
-	rate_cst::r(double s, double t) //????
+	double rate_cst::get_rate(double s, double t) //returns the rate for the specific space s and time t
 	{
-    		return rate;
+    		return rate_cst::rate;
 	}
 
 }

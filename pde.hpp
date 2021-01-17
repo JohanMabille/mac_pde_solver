@@ -3,7 +3,7 @@
 
 #include <cstddef>
 #include <vector>
-
+#include "interface.hpp"
 namespace dauphine
 {
 
@@ -11,7 +11,7 @@ namespace dauphine
     {
     public:
         
-        pde();
+        explicit pde();
         virtual ~pde();
         
         // PDE Coefficients
@@ -28,7 +28,8 @@ namespace dauphine
         
     public:
         
-        explicit bs_pde();
+        bs_pde();
+        bs_pde(interface* option); //added to match the cpp file, please review
         virtual ~bs_pde();
         
         double first_coeff() const;
