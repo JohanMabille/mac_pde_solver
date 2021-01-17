@@ -5,6 +5,7 @@
 #include "pde_boundary_conditions.hpp"
 #include "fdm.hpp"
 #include "rate.hpp"
+#include "volatility.hpp"
 // #include "volatility.hpp"
 
 
@@ -32,25 +33,27 @@
 
 namespace dauphine {
 
-    void test_interface()
-    {
-        payoff* c1 = new call(100.);
-        interface* market = new interface(0.05, 2, 0.16, c1);
+    void test(){
+        rate_cst* rate = new rate_cst(0.05);
+        vol_cst* vol = new vol_cst(0.2);
+        std::cout<<"Rate " << rate->get_rate(0,0)<<std::endl;
+        double strike = 100;
+        double spot = 150;
+        double maturity = 0.25; // in years
         
+        call* c = new call(strike);
+        std::cout<<"Payoff " << c->get_payoff(spot)<<std::endl;
+        interface* market = new interface(rate, maturity, vol, c);
+        std::cout<<"Price " << c->get_payoff(spot)<<std::endl;
         
-        
-        
-        delete market;
-        delete c1;
     }
-
 }
 
 
 
 int main(int argc, const char * argv[])
 {
-    dauphine::test_interface();
+    dauphine::test();
     return 0;
 }
 

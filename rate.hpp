@@ -11,7 +11,7 @@ namespace dauphine
     public:
 	explicit rate();
         virtual ~rate();
-       	virtual double r(double s, double t) = 0;
+       	virtual double get_rate(double s, double t) = 0; // returns the rate at space point s and time t
         
     };
 
@@ -22,8 +22,8 @@ namespace dauphine
       	double rate = 0;
         
     public:
-        rate_cst(double initial_sigma);
-       	double r(double s, double t); //????
+        rate_cst(double initial_rat);
+       	double get_rate(double s, double t);
     };
 }
 

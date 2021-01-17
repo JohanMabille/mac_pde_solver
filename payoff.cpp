@@ -7,7 +7,7 @@
 namespace dauphine
 {
 
-	payoff:payoff()
+	payoff::payoff()
 	{
         std::cout<< "payoff constructor" << std::endl;
 	}
@@ -17,8 +17,8 @@ namespace dauphine
         std::cout<< "payoff destructor" << std::endl;
 	}
 
-	call::call(const double K) const
-		: strike(K)
+	call::call(double strike)
+		: K(strike)
 	{
         std::cout<< "call constructor" << std::endl;
 	}
@@ -29,12 +29,12 @@ namespace dauphine
         std::cout<< "call destructor" << std::endl;
    	 }
 
-	double call::get_payoff(const double S) const
+	double call::get_payoff(double S)
 	{
-		return std::max(S-K, 0);
+		return fmax(S-K, 0); // std max didnt work
 	}
 
-	put::put(const double K) const
+	put::put(double strike)
 		: K(strike)
 	{
         std::cout<< "put constructor" << std::endl;
@@ -42,13 +42,13 @@ namespace dauphine
 
     put::~put()
     	{
-        strike = 0;
+        K=0;
         std::cout<< "put destructor" << std::endl;
     	}
 
-	double put::get_payoff(const double S) const
+	double put::get_payoff(const double S)
 	{
-		return std::max(K-S, 0);
+		return fmax(K-S, 0); //std max didnt work
 	}
 
 	
