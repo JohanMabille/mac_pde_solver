@@ -23,6 +23,20 @@ endif()
 set(PDE_SOLVER_SRCS
     closed_form.hpp
     closed_form.cpp
+    fdm.hpp
+    fdm.cpp
+    interface.hpp
+    interface.cpp
+    payoff.hpp
+    payoff.cpp
+    pde_boundary_conditions.hpp
+    pde_boundary_conditions.cpp
+    pde.cpp
+    pde.hpp
+    rate.hpp
+    rate.cpp
+    volatility.hpp
+    volatility.cpp
     main.cpp
 )
 
