@@ -17,12 +17,13 @@ namespace dauphine
 	{
     public:
         interface();     // a quoi il sert ?
-        interface(/*double K,*/ rate* r, double T, volatility* sig, payoff* pay);
+        interface(double spot, rate* r, double T, volatility* sig, payoff* pay);
         ~interface();
         
         double get_rate();
         double get_maturity();
         double get_vol();
+	double get_spot();
 	        
     protected:
         payoff* payoff;
@@ -31,6 +32,7 @@ namespace dauphine
         rate* m_rate;
         double maturity;
         volatility* m_vol;
+	double m_spot;
 	};
 
 }
