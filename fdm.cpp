@@ -1,4 +1,6 @@
 #include "fdm.hpp"
+#include "pde_boundary_conditions.hpp"
+#include "interface.hpp"
 #include <string>
 #include <vector>
 #include <iostream>
@@ -18,23 +20,21 @@ namespace dauphine
 	{
 	}
 
-	double fdm_interface::a1(pde* pde) const
+	double fdm_interface::a1(pde* pde,double s, double t) const
 	{		
-        double alpha = (pde->first_coeff())/(pow(m_dx, 2));
+        	double alpha = (pde->first_coeff())/(pow(m_dx, 2));
 		double beta=(pde->conv_coeff())/(2*fdm_interface::m_dx);
 		
 		return m_dt*(1-theta)*(beta-alpha);
 	}
 
-	double fdm_interface::a2(pde* pde) const
+	double fdm_interface::a2(pde* pde, double s, double t) const
 	{
-        double s=0; // TODO retrieve s and t either via parameters or via pde state
-        double t=0;
-		double alpha = (pde->first_coeff())/(pow(m_dx,2));
-        return (1- (1-theta)*m_dt*(r->get_rate(s, t) - 2*alpha));
+ 		double alpha = (pde->first_coeff())/(pow(m_dx,2));
+        	return (1- (1-theta)*m_dt*(r->get_rate(s, t) - 2*alpha));
 	}
 
-	double fdm_interface::a3(pde* pde) const
+	double fdm_interface::a3(pde* pde, double s, double t) const
 	{
 		double alpha = (pde->first_coeff())/(pow(m_dx, 2));
 		double beta=(pde->conv_coeff())/(2*m_dx);
@@ -42,7 +42,7 @@ namespace dauphine
 		return (-m_dt*(1-theta)*(beta+alpha));
 	}
 
-	double fdm_interface::b1(pde* pde) const
+	double fdm_interface::b1(pde* pde, double s, double t) const
 	{
 		double alpha = (pde->first_coeff())/(pow(m_dx, 2));
 		double beta=(pde->conv_coeff())/(2*m_dx);
@@ -50,16 +50,14 @@ namespace dauphine
 		return m_dt*theta*(alpha - beta);
 	}
 
-	double fdm_interface::b2(pde* pde) const
+	double fdm_interface::b2(pde* pde, double s, double t) const
 	{
-        float s = 0; // TODO as above
-        float t = 0;
-		double alpha = (pde->first_coeff())/(pow(m_dx, 2));
+    		double alpha = (pde->first_coeff())/(pow(m_dx, 2));
 			
-        return (1- theta*m_dt*(r->get_rate(s, t) - 2*alpha));
+       		return (1- theta*m_dt*(r->get_rate(s, t) - 2*alpha));
 	}
 
-	double fdm_interface::b3(pde* pde) const
+	double fdm_interface::b3(pde* pde, double s, double t) const
 	{
 		double alpha = (pde->first_coeff())/(pow(m_dx, 2));
 		double beta=(pde->conv_coeff())/(2*m_dx);
@@ -67,153 +65,134 @@ namespace dauphine
 		return m_dt*theta*(beta+alpha);
 	}
 
-	fdm::fdm(pde* pde, payoff* payoff, const double f0, const double fN, const double lower_T, const double upper_T, const double lower_N, const double upper_N, const int dt, const int dx)
+	fdm::fdm(pde* pde, payoff* payoff, const double f0, const double fN, const int dt, const int dx)
 	{
-        m_pde = pde;
-        m_payoff = payoff;
-        boundary_f0 = f0;
-        boundary_fN = fN;
-        lT = lower_T;
-        uT = upper_T;
-        lN = lower_N;
-        uN = upper_N;
-        m_dt = dt;
-        m_dx = dx;
-		//Calcul avec FDM
-		//1. On discretise le temps et l'espace
-		//ajouter dt et dx en argument
-		//std::vector<double> liste_t = time_mesh(lower_T, upper_T); // Utile ?
-		//std::vector<double> liste_S = space_mesh(lower_N, upper_N); 	
+       	}
 
-		double T = floor((upper_T-lower_T)/dt);
-		double N = floor((upper_N-lower_N)/dt);
-	
-		//2. Calcul des f intermédiaires
-		//Calcul du nb de steps en tps et en espace: T et N
-		
-		//Calcul de la matrice F en T
-        std::vector<double> F(N,0); //std::fill(1,N-1, payoff);
-        // TODO over payoff depending on s and t and insert the value into F
-        
-		//Calcul des coeffs des matrices tridiagonales
-		// changed from a1 (overwriting the method a1) to t_a1
-        double t_a1 = a1(pde);
-		double t_a2 = a2(pde);
-		double t_a3 = a3(pde);
-		double t_b1 = b1(pde);
-		double t_b2 = b2(pde);
-		double t_b3 = b3(pde);
-
-		//Calcul du terme constant que l'on extrait pour avoir une matrice tridiagonale
-		std::vector<double> c (N, 0);
-        // changed r to r0. Need to introduce the dependency of s and t
-        double r0 = pde->zero_coeff();
-		c[0]= (t_a1 - t_b1*exp(-r0*dt))*f0;
-		c[N-2]= (t_a3 - t_b3*exp(-r0*dt))*f0;
-
-		//Calcul de la matrice D en T
-		std::vector<double> D(N,0);
-		D[0] = t_a2*F[0] + t_a3*F[1] + c[0];
-		D[N-2] = t_a1*F[N-2] + t_a2*F[N-2] + c[N-2];
-		for (int i=1; i<N-2; i++)
-		{
-			D[i] = t_a1*F[i-1] + t_a2*F[i] + t_a3*F[i+1];
-		}
-
-		//On remonte via l'algorithme de Thomas
-		std::vector<double> coeffs(3,0);
-		coeffs[0] = t_b1;
-		coeffs[1] = t_b2;
-		coeffs[2] = t_b3;
-
-		for (int t = T-1; t>=0 ; t--)
-		{
-			//Pour chaque x(i,t+1), en commencant par f_N, on remonte à x(i,t)
-			//via l'algo de Thomas et le système trouvé
-
-			//On calcule la matrice F en t, et on fait Ft1=Ft
-            // TODO added F as x
-			F = thomas(coeffs, F, D);
-
-			//On recalcule la nouvelle matrice D
-			D[0] = t_a2*F[0] + t_a3*F[1] + c[0];
-			D[N-2] = t_a1*F[N-2] + t_a2*F[N-2] + c[N-2];
-			for (int i=1; i<N-2; i++)
-			{
-				D[i] = t_a1*F[i-1] + t_a2*F[i] + t_a3*F[i+1];
-			}
-		}
-
-		//return F[floor(N/2)]; // CANT RETURN ANYTHING IN CONSTRUCTOR... TODO!
-	}
-
-	
 	fdm::~fdm()
 	{
 		delete m_pde; //destruction du pointeur
 	}
 
-	std::vector<double> fdm::time_mesh(const double lower_T, const double upper_T, const int dt) const
+	double fdm::get_price(pde* pde, interface* opt, payoff* payoff, const double f0, const double fN, const int dt, const int dx)
 	{
-		int T = floor((upper_T-lower_T)/dt);
-		std::vector<double> v (T+1, 0);
-		v[0]=lower_T;
-		v[T-1]=upper_T;
+		//Calcul avec FDM
+		//1. On discretise le temps et l'espace
+			
+		double T = time_mesh(dt, opt);
+		double N = space_mesh(dx, opt);
+		double r0 = opt->get_rate(); //dependency in t & s?
 
-		for (int c=1; c<T-1; c++) //Ou avec un functor?
+		//2. Calcul des f intermédiaires
+			
+		//Calcul de la matrice F en T
+        	std::vector<double> F(N-1, payoff->get_payoff(opt->get_spot()));
+        	        
+		//Calcul des coeffs des matrices tridiagonales en T
+		double mat = opt->get_maturity(); 
+		//def matrice des coeffs pour avoir les coeffs en tt pt de l espace
+		std::vector<double> A1(N-1, 0.0);
+		std::vector<double> A2(N-1, 0.0);
+		std::vector<double> A3(N-1, 0.0);
+		std::vector<double> B1(N-1, 0.0);
+		std::vector<double> B2(N-1, 0.0);
+		std::vector<double> B3(N-1, 0.0);
+				
+		double Smax = s_boundary_right(opt->get_spot(), opt->get_vol(), opt->get_maturity());
+		double Tmax =  t_boundary_right(opt->get_maturity());
+		double s = Smax;
+		for (int i=0; i < N-1; i++)
 		{
-			v[c] = v[c-1] + dt;
+			A1[i] = a1(pde, s, mat);
+			A2[i] = a2(pde, s, mat);
+			A3[i] = a3(pde, s, mat);
+			B1[i] = b1(pde, s, mat);
+			B2[i] = b2(pde, s, mat);
+			B3[i] = b3(pde, s, mat);
+
+			s -= dx;
+		}
+		//Calcul du terme constant que l'on extrait pour avoir une matrice tridiagonale
+		std::vector<double> C(N-1, 0.0);
+		C[0] = (A1[0] - B1[0]*exp(-r0*dt))*f0;
+		C[N-2] = (A3[N-2] - B3[N-2]*exp(-r0*dt))*fN;
+
+		//Calcul de la matrice D en T
+		std::vector<double> D(N,0.0);
+		D[0] = A2[0]*F[0] + A3[0]*F[1] + C[0];
+		D[N-2] = A1[N-2]*F[N-2] + A2[N-2]*F[N-2] + C[N-2];
+		
+		for (int i=1; i < N-2; i++)
+		{
+			D[i] = A1[i]*F[i-1] + A2[i]*F[i] + A3[i]*F[i+1];
 		}
 
-		return v;	
-	}
-	
-	std::vector<double> fdm::space_mesh(const double lower_N, const double upper_N, const int dx) const
-	{
-		int N = floor((upper_N-lower_N)/dx);
-		std::vector<double> v (N+1, 0);
-		v[0]=lower_N;
-		v[N-1]=upper_N;
+		//On remonte via l'algorithme de Thomas
+				s = Smax;
 
-		for (int c=1; c<N-1; c++) //Ou avec un functor?
+		for (int t = T-1; t>=0 ; t--)
 		{
-			v[c] = v[c-1] + dx;
-		}
+			//Pour chaque x(i,t+1), en commencant par f_N, on remonte à x(i,t)
+			//via l'algo de Thomas et le système trouvé
+			
+			//On calcule la matrice tridiagoname en t en tt pt de l'espace
+			for (int i=0; i < N-1; i++)
+			{
+				A1[i] = a1(pde, s, t);
+				A2[i] = a2(pde, s, t);
+				A3[i] = a3(pde, s, t);
+				B1[i] = b1(pde, s, t);
+				B2[i] = b2(pde, s, t);
+				B3[i] = b3(pde, s, t);
+
+				s -= dx;
+			}
+
+
+			//On calcule la matrice F en t, et on fait Ft1=Ft
+      			F = thomas(B1, B2, B3, F, D);
+
+			//On recalcule la nouvelle matrice D
+			D[0] = A2[0]*F[0] + A3[0]*F[1] + C[0];
+			D[N-2] = A1[N-2]*F[N-2] + A2[N-2]*F[N-2] + C[N-2];
 		
-		return v;
+			for (int i=1; i < N-2; i++)
+			{
+				D[i] = A1[i]*F[i-1] + A2[i]*F[i] + A3[i]*F[i+1];
+			}
+		}
+
+		return F[floor(N/2)];
 	}
 
-	std::vector<double> fdm::thomas(const std::vector<double> coeffs, std::vector<double> x,  std::vector<double> d)
+
+	std::vector<double> fdm::thomas(const std::vector<double> a, const std::vector<double> b, const std::vector<double> c, std::vector<double> x,  std::vector<double> d)
 	{
-		//algo de Thomas pour inverser une matrice tridiagonale dans le cas de coeffs "constant" dans l'espace
-		double a=coeffs[0];
-		double b=coeffs[1];
-		double c=coeffs[2];
-		
-        int n = d.size();
-		std::vector<double> new_coeffs (n+1, 0);
-		std::vector<double> new_d (n+1, 0);
+		//algo de Thomas pour inverser une matrice tridiagonale dans le cas de coeffs "constant" dans l'espace		
+        	int n = d.size();
+		std::vector<double> new_coeffs(n, 0);
+		std::vector<double> new_d(n, 0);  
 
 		//Forward sweep
-		new_coeffs[0]=c/b;
-		new_d[0]= d[0]/b;
+		new_coeffs[0] =c[0]/b[0];
+		new_d[0] = d[0]/b[0];
 
-		for (int i=1; i<n-1; i++)
+		for (int i=1; i<n; i++)
 		{
-			new_coeffs[i]=c/(b-a*new_coeffs[i-1]);
-			new_d[0]= (d[i]-a*new_d[i-1])/(b-a*new_coeffs[i-1]);
+			new_coeffs[i] = c[i] / (b[i]-a[i] * new_coeffs[i-1]);
+			new_d[0] = (d[i]-a[i] * new_d[i-1]) / (b[i]-a[i] * new_coeffs[i-1]);
 		}
 		
 		//Back substitution
-        //std::vector<double> x = std::fill(0, n, 0); // According to hpp file, x is a parameter
-		x[n-1]=new_d[n-1];
+        	std::vector<double> y(n, 0.0); 
+		y[n-1] = new_d[n-1];
 
 		for (int i=n-2; i>=0; i--)
 		{
-			x[i]=new_d[i] - new_coeffs[i]*x[i+1];
+			y[i] = new_d[i] - new_coeffs[i]*x[i+1];
 		}
 
-		return x;
+		return y;
 	}
 
 }
