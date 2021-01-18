@@ -14,33 +14,33 @@ namespace dauphine
 	{
         //Classe qui encapsule les payoffs
         //Logique de sémantique d'entité car payoff different pour chaque option
-		public: //Constructeurs et destructeurs virtuels
-        explicit payoff();
-			virtual ~payoff();
-			virtual double get_payoff(const double S) = 0;
+	public: //Constructeurs et destructeurs virtuels
+       		explicit payoff();
+		virtual ~payoff();
+		virtual double get_payoff(const double S) = 0;
     };
 
 	class call: public payoff //Classe de base pour un call
 	{
-		private:
-			double K;
-		public: //Redefinition des méthodes virtuelles pures de la classe mère
-			call(double strike); //Constructeur
-		 	~call();
-			double get_payoff(const double S) override;
-        double strike;
+	private:
+		double K;
+	public: //Redefinition des méthodes virtuelles pures de la classe mère
+		call(double strike); //Constructeur
+		~call();
+		double get_payoff(const double S) override;
+		double strike;
 			//calcul du payoff
 		
     	};
 
 	class put: public payoff
 	{
-		private:
-			double K;
-		public:
-			put(double strike);
-		 	~put();
-			double get_payoff(const double S) override;
+	private:
+		double K;
+	public:
+		put(double strike);
+		~put();
+		double get_payoff(const double S) override;
     };
 
 }
