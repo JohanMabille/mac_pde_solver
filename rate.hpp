@@ -20,9 +20,11 @@ namespace dauphine
     {
     private:
       	double rate = 0;
+
         
     public:
-        rate_cst(double initial_rat);
+        rate_cst(double initial_rate);
+	~rate_cst();
        	double get_rate(double s, double t);
     };
 }
