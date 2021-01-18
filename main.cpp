@@ -43,7 +43,7 @@ namespace dauphine {
         
         call* c = new call(strike);
         std::cout<<"Payoff " << c->get_payoff(spot)<<std::endl;
-        interface* market = new interface(rate, maturity, vol, c);
+        interface* market = new interface(spot, rate, maturity, vol, c);
         std::cout<<"Price " << c->get_payoff(spot)<<std::endl;
         
     }
