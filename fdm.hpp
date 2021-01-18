@@ -5,7 +5,7 @@
 #include <vector>
 #include <iostream>
 #include <cmath>
-#include <numeric>
+#include <numeric>  
 #include <functional>
 #include "pde.hpp"
 #include "payoff.hpp"

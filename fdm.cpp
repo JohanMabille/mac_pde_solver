@@ -171,7 +171,7 @@ namespace dauphine
 		//algo de Thomas pour inverser une matrice tridiagonale dans le cas de coeffs "constant" dans l'espace		
         	int n = d.size();
 		std::vector<double> new_coeffs(n, 0);
-		std::vector<double> new_d(n, 0);
+		std::vector<double> new_d(n, 0);  
 
 		//Forward sweep
 		new_coeffs[0] =c[0]/b[0];
