@@ -19,7 +19,7 @@ namespace dauphine{
 		std::cout << "destructeur rate" << std::endl;
 	}
 
-	rate::get_rate(double s, double t)
+	double rate::get_rate(double s, double t)
 	{
 	}
 
