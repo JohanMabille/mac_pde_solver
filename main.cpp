@@ -33,19 +33,32 @@
 
 namespace dauphine {
 
-    void test(){
-        rate_cst* rate = new rate_cst(0.05);
-        vol_cst* vol = new vol_cst(0.2);
-        std::cout<<"Rate " << rate->get_rate(0,0)<<std::endl;
-        double strike = 100;
+    void test()
+    {
+	double strike = 100;
         double spot = 150;
-        double maturity = 0.25; // in years
-        
-        call* c = new call(strike);
-        std::cout<<"Payoff " << c->get_payoff(spot)<<std::endl;
-        interface* market = new interface(spot, rate, maturity, vol, c);
-        std::cout<<"Price " << c->get_payoff(spot)<<std::endl;
-        
+        double maturity = 21.25; // in years
+	double f0 = 1.;
+	double fN = 20.;
+	int dt = 1;
+	int dx = 1;
+	double theta = 0.5;
+
+        rate* rate = new rate_cst(0.05);
+        volatility* vol = new vol_cst(0.2);
+                
+        payoff* c = new call(strike);
+	interface* option = new interface(spot, rate, maturity, vol, c);
+	pde* eq = new bs_pde(option);
+	Space_boundaries* sb = new Sboundaries();
+	Time_boundaries* tb = new Tboundaries();
+	fdm_interface* f = new fdm(eq, c, rate, f0, fN, dt, dx, theta);
+
+	std::cout << "Rate: " << rate->get_rate(0,0)<< std::endl;
+        std::cout << "Payoff: " << c->get_payoff(spot)<< std::endl;
+        std::cout << "FDM Price: " << f->get_price(eq, option, c, sb, tb) << std::endl;
+	std::cout << "BS Price: " << bs_price(spot, strike, 0.2, maturity, true) << std::endl;
+
     }
 }
 
