@@ -1,5 +1,12 @@
 #include "pde_boundary_conditions.hpp"
+#include "interface.hpp"
+
 #include <math.h>
+#include <iostream>
+#include <string>
+#include <vector>
+#include <cmath>
+
 namespace dauphine
 {
 
@@ -15,14 +22,11 @@ namespace dauphine
     		return upper_boundary;
 	}
 		
-	double Sboundaries::space_mesh(const int dx, interface* option)
+	double Sboundaries::space_mesh(const int dx, interface* option) const
 	{
-		double nbN;
-		S_max = boundary_right(option.m_spot, option->get_vol(), option->get_maturity());
-		S_min = boundary_left(option.m_spot, option->get_vol(), option->get_maturity());
-		nbN = floor((S_max-S_min)/dx);
-
-		return nbN;	
+		double S_max = s_boundary_right(option->get_spot(), option->get_vol(), option->get_maturity());
+		double S_min = s_boundary_left(option->get_spot(), option->get_vol(), option->get_maturity());
+		return floor((S_max-S_min)/dx);	
 	}
 
 
@@ -38,12 +42,10 @@ namespace dauphine
 
 	double Tboundaries::time_mesh(const int dt, interface* option) const
 	{
-		double nbT;
-		T_max = boundary_right(option->get_maturity());
-		T_min = boundary_left(T_max); //argu nécessaire dans la fonction?
-		nbT = floor((T_max-T_min)/dt);
-
-		return nbT;	
+		double T_max = t_boundary_right(option->get_maturity());
+		double T_min = t_boundary_left(T_max); //argu nécessaire dans la fonction?
+		return (T_max-T_min)/dt;
+	
 	}
 
 
