@@ -12,12 +12,17 @@
 namespace dauphine
 {
 
-	fdm_interface::fdm_interface()
+	fdm_interface::fdm_interface(pde* pde, payoff* pay, rate* r, double f0, double fN, int dt, int dx, double theta)
+		: m_pde(pde), m_payoff(pay), m_r(r), m_f0(f0), m_fN(fN), m_dt(dt), m_dx(dx), m_theta(theta)
 	{
 	}
 
 	fdm_interface::~fdm_interface()
 	{
+		delete m_pde; //destruction du pointeur
+		delete m_r;
+		delete m_payoff;
+
 	}
 
 	double fdm_interface::a1(pde* pde,double s, double t) const
@@ -25,13 +30,13 @@ namespace dauphine
         	double alpha = (pde->first_coeff())/(pow(m_dx, 2));
 		double beta=(pde->conv_coeff())/(2*fdm_interface::m_dx);
 		
-		return m_dt*(1-theta)*(beta-alpha);
+		return m_dt*(1-m_theta)*(beta-alpha);
 	}
 
 	double fdm_interface::a2(pde* pde, double s, double t) const
 	{
  		double alpha = (pde->first_coeff())/(pow(m_dx,2));
-        	return (1- (1-theta)*m_dt*(r->get_rate(s, t) - 2*alpha));
+        	return (1- (1-m_theta)*m_dt*(m_r->get_rate(s, t) - 2*alpha));
 	}
 
 	double fdm_interface::a3(pde* pde, double s, double t) const
@@ -39,7 +44,7 @@ namespace dauphine
 		double alpha = (pde->first_coeff())/(pow(m_dx, 2));
 		double beta=(pde->conv_coeff())/(2*m_dx);
 		
-		return (-m_dt*(1-theta)*(beta+alpha));
+		return (-m_dt*(1-m_theta)*(beta+alpha));
 	}
 
 	double fdm_interface::b1(pde* pde, double s, double t) const
@@ -47,14 +52,14 @@ namespace dauphine
 		double alpha = (pde->first_coeff())/(pow(m_dx, 2));
 		double beta=(pde->conv_coeff())/(2*m_dx);
 		
-		return m_dt*theta*(alpha - beta);
+		return m_dt*m_theta*(alpha - beta);
 	}
 
 	double fdm_interface::b2(pde* pde, double s, double t) const
 	{
     		double alpha = (pde->first_coeff())/(pow(m_dx, 2));
 			
-       		return (1- theta*m_dt*(r->get_rate(s, t) - 2*alpha));
+       		return (1- m_theta*m_dt*(m_r->get_rate(s, t) - 2*alpha));
 	}
 
 	double fdm_interface::b3(pde* pde, double s, double t) const
@@ -62,32 +67,37 @@ namespace dauphine
 		double alpha = (pde->first_coeff())/(pow(m_dx, 2));
 		double beta=(pde->conv_coeff())/(2*m_dx);
 
-		return m_dt*theta*(beta+alpha);
+		return m_dt*m_theta*(beta+alpha);
 	}
 
-	fdm::fdm(pde* pde, payoff* payoff, const double f0, const double fN, const int dt, const int dx)
+	fdm::fdm(pde* pde, payoff* payoff, rate * r, double f0, double fN, int dt, int dx, double theta)
+		: fdm_interface(pde, payoff, r, f0, fN, dt, dx, theta)
 	{
        	}
 
 	fdm::~fdm()
 	{
-		delete m_pde; //destruction du pointeur
+		m_pde = nullptr;
+		m_r = nullptr;
+		m_payoff = nullptr;
 	}
 
-	double fdm::get_price(pde* pde, interface* opt, payoff* payoff, const double f0, const double fN, const int dt, const int dx)
+	double fdm::get_price(pde* pde, interface* opt, payoff* payoff, Space_boundaries* sb, Time_boundaries* tb) const
 	{
 		//Calcul avec FDM
 		//1. On discretise le temps et l'espace
-			
-		double T = time_mesh(dt, opt);
-		double N = space_mesh(dx, opt);
+		double T = tb->time_mesh(m_dt, opt);
+		double N = sb->space_mesh(m_dx, opt);
 		double r0 = opt->get_rate(); //dependency in t & s?
+
+		std::cout << "wesh 1" <<std::endl;
 
 		//2. Calcul des f intermédiaires
 			
 		//Calcul de la matrice F en T
         	std::vector<double> F(N-1, payoff->get_payoff(opt->get_spot()));
-        	        
+        	
+		std::cout << "wesh 2" <<std::endl;
 		//Calcul des coeffs des matrices tridiagonales en T
 		double mat = opt->get_maturity(); 
 		//def matrice des coeffs pour avoir les coeffs en tt pt de l espace
@@ -98,9 +108,12 @@ namespace dauphine
 		std::vector<double> B2(N-1, 0.0);
 		std::vector<double> B3(N-1, 0.0);
 				
-		double Smax = s_boundary_right(opt->get_spot(), opt->get_vol(), opt->get_maturity());
-		double Tmax =  t_boundary_right(opt->get_maturity());
-		double s = Smax;
+		double Smax = sb->s_boundary_right(opt->get_spot(), opt->get_vol(), opt->get_maturity());
+		double Tmax =  tb->t_boundary_right(opt->get_maturity());
+		double Tmin =  tb->t_boundary_left(opt->get_maturity());
+
+		double s = exp(Smax);
+
 		for (int i=0; i < N-1; i++)
 		{
 			A1[i] = a1(pde, s, mat);
@@ -110,12 +123,21 @@ namespace dauphine
 			B2[i] = b2(pde, s, mat);
 			B3[i] = b3(pde, s, mat);
 
-			s -= dx;
+			s -= m_dx;
 		}
+
+		std::cout << N <<std::endl;
+
 		//Calcul du terme constant que l'on extrait pour avoir une matrice tridiagonale
 		std::vector<double> C(N-1, 0.0);
-		C[0] = (A1[0] - B1[0]*exp(-r0*dt))*f0;
-		C[N-2] = (A3[N-2] - B3[N-2]*exp(-r0*dt))*fN;
+		std::cout << "wesh 3" <<std::endl;
+
+		C[0] = (A1[0] - B1[0]*exp(-r0*m_dt))*m_f0;
+		std::cout << "wesh 3b" <<std::endl;
+
+		C[N-2] = (A3[N-2] - B3[N-2]*exp(-r0*m_dt))*m_fN;
+
+		std::cout << "wesh 4" <<std::endl;
 
 		//Calcul de la matrice D en T
 		std::vector<double> D(N,0.0);
@@ -127,8 +149,11 @@ namespace dauphine
 			D[i] = A1[i]*F[i-1] + A2[i]*F[i] + A3[i]*F[i+1];
 		}
 
+		std::cout << "wesh 5" <<std::endl;
+
+
 		//On remonte via l'algorithme de Thomas
-				s = Smax;
+		s = exp(Smax);
 
 		for (int t = T-1; t>=0 ; t--)
 		{
@@ -145,7 +170,7 @@ namespace dauphine
 				B2[i] = b2(pde, s, t);
 				B3[i] = b3(pde, s, t);
 
-				s -= dx;
+				s -= m_dx;
 			}
 
 
@@ -162,11 +187,13 @@ namespace dauphine
 			}
 		}
 
+		std::cout << "wesh end" <<std::endl;
+
 		return F[floor(N/2)];
 	}
 
 
-	std::vector<double> fdm::thomas(const std::vector<double> a, const std::vector<double> b, const std::vector<double> c, std::vector<double> x,  std::vector<double> d)
+	std::vector<double> fdm::thomas(const std::vector<double> a, const std::vector<double> b, const std::vector<double> c, std::vector<double> x,  std::vector<double> d) const
 	{
 		//algo de Thomas pour inverser une matrice tridiagonale dans le cas de coeffs "constant" dans l'espace		
         	int n = d.size();
