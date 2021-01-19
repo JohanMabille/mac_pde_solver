@@ -35,7 +35,7 @@ namespace dauphine
     double bs_pde::diff_coeff() const
     {
       double sigma = opt->get_vol();
-      return 0.5*sigma*sigma;
+      return -0.5*sigma*sigma;
     }
 
     double bs_pde::conv_coeff() const
