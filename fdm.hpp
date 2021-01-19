@@ -25,8 +25,10 @@ namespace dauphine
 		virtual double b1(pde* pde, double s, double t) const;
 		virtual double b2(pde* pde, double s, double t) const;
 		virtual double b3(pde* pde, double s, double t) const;
-		virtual std::vector<double> thomas(const std::vector<double> a, const std::vector<double> b, const std::vector<double> c, std::vector<double> x,  std::vector<double> d) const = 0;
-		virtual double get_price(pde* pde, interface* opt, payoff* payoff, Space_boundaries* sb, Time_boundaries* tb) const = 0;
+		
+        virtual std::vector<double> thomas(const std::vector<double> a, const std::vector<double> b, const std::vector<double> c,  std::vector<double> d) const = 0;
+        
+		virtual std::vector<double> get_price(pde* pde, interface* opt, payoff* payoff, Space_boundaries* sb, Time_boundaries* tb) const = 0;
 	
     	protected:
         	pde* m_pde;
@@ -45,9 +47,16 @@ namespace dauphine
 		fdm(pde* pde, payoff* payoff, rate * r, double f0, double fN, int dt, int dx, double theta);
 		~fdm();
 
-		std::vector<double> thomas(const std::vector<double> a, const std::vector<double> b, const std::vector<double> c, std::vector<double> x,  std::vector<double> d) const override;
+		std::vector<double> thomas(const std::vector<double> a,
+                                   const std::vector<double> b,
+                                   const std::vector<double> c,
+                                   std::vector<double> d) const override;
 		
-		double get_price(pde* pde, interface* opt, payoff* payoff, Space_boundaries* sb, Time_boundaries* tb) const override;
+        std::vector<double> get_price(pde* pde,
+                                      interface* opt,
+                                      payoff* payoff,
+                                      Space_boundaries* sb,
+                                      Time_boundaries* tb) const override;
 	
     };
 
