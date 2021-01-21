@@ -56,6 +56,4 @@ namespace dauphine
       return 0.;
     }
 
-    //call bondary conditions?
-
 }

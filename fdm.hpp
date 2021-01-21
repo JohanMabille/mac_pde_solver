@@ -10,6 +10,7 @@
 #include "pde.hpp"
 #include "payoff.hpp"
 #include "pde_boundary_conditions.hpp"
+#include "interface.hpp"
 
 
 namespace dauphine
@@ -28,7 +29,25 @@ namespace dauphine
 		
         virtual std::vector<double> thomas(const std::vector<double> a, const std::vector<double> b, const std::vector<double> c,  std::vector<double> d) const = 0;
         
-		virtual std::vector<double> get_price(pde* pde, interface* opt, payoff* payoff, Space_boundaries* sb, Time_boundaries* tb) const = 0;
+		virtual double get_price(pde* pde, interface* opt, payoff* payoff, Space_boundaries* sb, Time_boundaries* tb) const = 0;
+        
+        virtual double get_delta(pde* pde,
+                                 interface* opt,
+                                 payoff* payoff,
+                                 Space_boundaries* sb,
+                                 Time_boundaries* tb) const = 0;
+        
+        virtual double get_gamma(pde* pde,
+                              interface* opt,
+                              payoff* payoff,
+                              Space_boundaries* sb,
+                              Time_boundaries* tb) const = 0;
+        
+        virtual double get_theta(pde* t_pde,
+                         interface* opt,
+                         payoff* payoff,
+                         Space_boundaries* sb,
+                         Time_boundaries* tb) const = 0;
 	
     	protected:
         	pde* m_pde;
@@ -52,11 +71,29 @@ namespace dauphine
                                    const std::vector<double> c,
                                    std::vector<double> d) const override;
 		
-        std::vector<double> get_price(pde* pde,
-                                      interface* opt,
-                                      payoff* payoff,
-                                      Space_boundaries* sb,
-                                      Time_boundaries* tb) const override;
+        double get_price(pde* t_pde,
+                         interface* opt,
+                         payoff* payoff,
+                         Space_boundaries* sb,
+                         Time_boundaries* tb) const override;
+        
+        double get_delta(pde* t_pde,
+                         interface* opt,
+                         payoff* payoff,
+                         Space_boundaries* sb,
+                         Time_boundaries* tb)const override;
+        
+        double get_gamma(pde* t_pde,
+                         interface* opt,
+                         payoff* payoff,
+                         Space_boundaries* sb,
+                         Time_boundaries* tb) const override;
+
+        double get_theta(pde* t_pde,
+                         interface* opt,
+                         payoff* payoff,
+                         Space_boundaries* sb,
+                         Time_boundaries* tb) const override;
 	
     };
 

@@ -23,16 +23,18 @@ namespace dauphine
         double get_rate();
         double get_maturity();
         double get_vol();
-	double get_spot();
+        double get_spot();
+        payoff* get_payoff();
+        
+        void set_spot(double spot);
+        void set_maturity(double t);
 	        
     protected:
-        payoff* payoff;
-        
-        //const double strike; //utile pour des options plus complexes?
+        payoff* m_payoff;
         rate* m_rate;
-        double maturity;
+        double m_maturity;
         volatility* m_vol;
-	double m_spot;
+        double m_spot;
 	};
 
 }

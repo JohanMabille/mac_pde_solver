@@ -11,29 +11,26 @@
 
 namespace dauphine
 {
+    class volatility
+     {
+     public:
+         explicit volatility();
+         virtual ~volatility();
+         virtual double get_sigma(double s, double t) = 0; // returns the volatility at space point s and time t
+         
+     };
 
 
-class volatility
- {
- public:
- explicit volatility();
-     virtual ~volatility();
-     virtual double get_sigma(double s, double t) = 0; // returns the volatility at space point s and time t
-     
- };
-
-
- class vol_cst: public volatility
- {
- private:
-     double sigma = 0;
-     
- public:
-     vol_cst(double initial_sigma);
-     double get_sigma(double s, double t);
- };
-
-
+     class vol_cst: public volatility
+     {
+     public:
+         vol_cst(double initial_sigma);
+         ~vol_cst();
+         double get_sigma(double s, double t);
+         
+     private:
+         double sigma;
+     };
 }
 
 #endif

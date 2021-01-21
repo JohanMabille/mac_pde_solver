@@ -36,7 +36,7 @@ namespace dauphine {
     void test()
     {
         double strike = 100;
-        double spot = 100;
+        double spot = 150;
         double maturity = 10; // in years
         double f0 = 1.;
         double fN = 200.;
@@ -54,19 +54,22 @@ namespace dauphine {
         Time_boundaries* tb = new Tboundaries();
         fdm_interface* f = new fdm(eq, c, rate, f0, fN, dt, dx, theta);
 
-        std::cout << "Rate: " << rate->get_rate(0,0)<< std::endl;
-        std::cout << "Payoff: " << c->get_payoff(spot)<< std::endl;
-//        std::cout << "FDM Price: " << f->get_price(eq, option, c, sb, tb) << std::endl;
-        
-        std::vector<double> p = f->get_price(eq, option, c, sb, tb);
-        
-        for (int i = 0; i<p.size(); ++i)
-        {
-            std::cout << p[i] << std::endl;
-        }
+        std::cout << "Rate: " << rate->get_rate(0,0) << std::endl;
+        std::cout << "Payoff: " << c->get_payoff(spot) << std::endl;
+        std::cout << "FDM Price: " << f->get_price(eq, option, c, sb, tb) << std::endl;
         std::cout << "BS Price: " << bs_price(spot, strike, vol->get_sigma(0., 0.), maturity, true) << std::endl;
+        std::cout << "Delta: " << f->get_delta(eq, option, c, sb, tb) << std::endl;
+        std::cout << "Gamma: " << f->get_gamma(eq, option, c, sb, tb) << std::endl;
+        std::cout << "Theta: " << f->get_theta(eq, option, c, sb, tb) << std::endl;
         
-        //ajouter destrcuteur
+        delete f;
+        delete tb;
+        delete sb;
+        delete eq;
+        delete option;
+        delete c;
+        delete vol;
+        delete rate;
 
     }
 }
