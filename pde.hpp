@@ -19,7 +19,7 @@ namespace dauphine
         virtual double diff_coeff() const = 0;
         virtual double conv_coeff() const = 0;
         virtual double zero_coeff() const = 0; 
-        virtual double source_coeff() const = 0; //utile?
+        virtual double source_coeff() const = 0;
 
     };
 
@@ -28,15 +28,14 @@ namespace dauphine
         
     public:
         
-        bs_pde();
         bs_pde(interface* option); //added to match the cpp file, please review
         virtual ~bs_pde();
         
-        double first_coeff() const;
-        double diff_coeff() const;
-        double conv_coeff() const;
-        double zero_coeff() const;
-        double source_coeff() const;
+        double first_coeff() const override;
+        double diff_coeff() const override;
+        double conv_coeff() const override;
+        double zero_coeff() const override;
+        double source_coeff() const override;
     
     private:
         

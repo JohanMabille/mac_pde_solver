@@ -24,7 +24,7 @@ namespace dauphine
         
     public:
         rate_cst(double initial_rate);
-	~rate_cst();
+        ~rate_cst();
        	double get_rate(double s, double t);
     };
 }

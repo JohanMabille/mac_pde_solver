@@ -17,7 +17,7 @@ namespace dauphine
 		
     		virtual double s_boundary_left(double s, double sigma, double t) const = 0;
         	virtual double s_boundary_right(double s, double sigma, double t) const = 0;
-		virtual double space_mesh(const int dx, interface* option) const = 0;
+            virtual double space_mesh(const int dx, interface* option) const = 0;
             
     	};
 
@@ -25,8 +25,8 @@ namespace dauphine
 	{
     	public:
         	double s_boundary_left(double s, double sigma, double t) const override;
-		double s_boundary_right(double s, double sigma, double t) const override;
-		double space_mesh(const int dx, interface* option) const override;      
+            double s_boundary_right(double s, double sigma, double t) const override;
+            double space_mesh(const int dx, interface* option) const override;
     	};
 
 	class Time_boundaries
@@ -34,7 +34,7 @@ namespace dauphine
        	public:
            	virtual double t_boundary_left(double t) const=0;
         	virtual double t_boundary_right(double t) const = 0;
-	  	virtual double time_mesh(const int dt, interface* option) const =0;
+            virtual double time_mesh(const int dt, interface* option) const =0;
    	};
 
 
@@ -43,7 +43,7 @@ namespace dauphine
        	public:
            	double t_boundary_left(double t) const override;
            	double t_boundary_right(double t) const override;
-	   	double time_mesh(const int dt, interface* option) const override;
+            double time_mesh(const int dt, interface* option) const override;
    	};
 
 }
