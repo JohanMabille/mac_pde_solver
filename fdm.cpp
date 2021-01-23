@@ -301,4 +301,37 @@ namespace dauphine
         return (p_plus - p_minus)/0.006;
     }
 
+
+    double fdm::get_vega(pde* t_pde,
+                          interface* opt,
+                          payoff* payoff,
+                          Space_boundaries* sb,
+                          Time_boundaries* tb) const
+    {
+        volatility* sig_plus = new vol_cst(opt->get_vol() + 0.01);
+        volatility* sig_minus = new vol_cst(opt->get_vol() - 0.01);
+        
+        interface* opt_plus = new interface(*opt);
+        opt_plus->set_vol(sig_plus);
+        
+        interface* opt_minus = new interface(*opt);
+        opt_minus->set_vol(sig_minus);
+        
+        pde* pde_plus = new bs_pde(opt_plus);
+        pde* pde_minus = new bs_pde(opt_minus);
+        
+        double p_plus = get_price(pde_plus, opt_plus, payoff, sb, tb);
+        double p_minus = get_price(pde_minus, opt_minus, payoff, sb, tb);
+        std::cout << p_plus << std::endl;
+        std::cout << p_minus << std::endl;
+        
+        delete pde_plus;
+        delete pde_minus;
+        delete opt_plus;
+        delete opt_minus;
+        
+        return (p_plus - p_minus)/0.02;
+    }
+
+
 }
