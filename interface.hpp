@@ -28,6 +28,8 @@ namespace dauphine
         
         void set_spot(double spot);
         void set_maturity(double t);
+	void set_vol(volatility* sig);
+
 	        
     protected:
         payoff* m_payoff;

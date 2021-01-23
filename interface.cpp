@@ -62,6 +62,12 @@ namespace dauphine
         this->m_maturity = t;
     }
 
+    void interface::set_vol(volatility* sig)
+    {
+        this->m_vol = sig;
+    }
+
+
 	
 }
 
