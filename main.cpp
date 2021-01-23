@@ -61,6 +61,8 @@ namespace dauphine {
         std::cout << "Delta: " << f->get_delta(eq, option, c, sb, tb) << std::endl;
         std::cout << "Gamma: " << f->get_gamma(eq, option, c, sb, tb) << std::endl;
         std::cout << "Theta: " << f->get_theta(eq, option, c, sb, tb) << std::endl;
+	std::cout << "Vega: " << f->get_vega(eq, option, c, sb, tb) << std::endl;
+
         
         delete f;
         delete tb;
