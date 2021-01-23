@@ -48,6 +48,13 @@ namespace dauphine
                          payoff* payoff,
                          Space_boundaries* sb,
                          Time_boundaries* tb) const = 0;
+
+	virtual double get_vega(pde* t_pde,
+                         interface* opt,
+                         payoff* payoff,
+                         Space_boundaries* sb,
+                         Time_boundaries* tb) const = 0;
+
 	
     	protected:
         	pde* m_pde;
@@ -94,6 +101,13 @@ namespace dauphine
                          payoff* payoff,
                          Space_boundaries* sb,
                          Time_boundaries* tb) const override;
+
+	double get_vega(pde* t_pde,
+                         interface* opt,
+                         payoff* payoff,
+                         Space_boundaries* sb,
+                         Time_boundaries* tb) const override;
+
 	
     };
 
