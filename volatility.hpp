@@ -9,27 +9,35 @@
 #include <functional>
 #include <stdio.h>
 
+#include "pde_boundary_conditions.hpp"
+#include "global.hpp"
+
+
 namespace dauphine
 {
     class volatility
      {
      public:
-         explicit volatility();
+         explicit volatility(Space_boundaries* sb,
+                             Time_boundaries* tb);
          virtual ~volatility();
-         virtual double get_sigma(double s, double t) = 0; // returns the volatility at space point s and time t
+         virtual double get_sigma(double s, double t) const;
+         virtual void vol_build() = 0;
          
+     protected:
+         std::vector<double> m_volatility;
+         int nb_rows;
+         int nb_cols;
      };
 
 
      class vol_cst: public volatility
      {
      public:
-         vol_cst(double initial_sigma);
+         vol_cst(Space_boundaries* sb,
+                 Time_boundaries* tb);
          ~vol_cst();
-         double get_sigma(double s, double t);
-         
-     private:
-         double sigma;
+         void vol_build() override;
      };
 }
 

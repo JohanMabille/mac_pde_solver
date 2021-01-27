@@ -1,6 +1,4 @@
 #include "pde.hpp"
-#include "interface.hpp"
-#include <iostream>
 
 namespace dauphine
 {
@@ -15,15 +13,16 @@ namespace dauphine
         std::cout<<"PDE destructor"<<std::endl;
     }
 
-    bs_pde::bs_pde(interface* option)
-    : opt(option)
+    bs_pde::bs_pde(interface* option, volatility* vol)
+    : m_opt(option), m_vol(vol)
     {
         std::cout<<"BS PDE constructor"<<std::endl;
     }
 
     bs_pde::~bs_pde()
     {
-        
+        m_opt = nullptr;
+        m_vol = nullptr;
         std::cout<<"BS PDE destructor"<<std::endl;
     }
 
@@ -32,28 +31,28 @@ namespace dauphine
         return 1.;
     }
 
-    double bs_pde::diff_coeff() const
+    double bs_pde::diff_coeff(double s, double t) const
     {
-      double sigma = opt->get_vol();
-      return -0.5*sigma*sigma;
+          double sigma = m_vol->get_sigma(s, t);
+          return -0.5*sigma*sigma;
     }
 
-    double bs_pde::conv_coeff() const
+    double bs_pde::conv_coeff(double s, double t) const
     {
-	double sigma = opt->get_vol();
-	double rate = opt->get_rate();
+        double sigma = m_vol->get_sigma(s, t);
+        double rate = m_opt->get_rate();
 
-      	return 0.5*sigma*sigma-rate;
+        return 0.5*sigma*sigma-rate;
     }
 
     double bs_pde::zero_coeff() const
     {
-      return opt->get_rate();
+        return m_opt->get_rate();
     }
 
     double bs_pde::source_coeff() const
     {
-      return 0.;
+        return 0.;
     }
 
 }

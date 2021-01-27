@@ -1,6 +1,7 @@
 #ifndef rate_hpp
 #define rate_hpp
 
+#include "global.hpp"
 #include <stdio.h>
 
 namespace dauphine
