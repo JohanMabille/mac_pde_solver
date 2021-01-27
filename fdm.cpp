@@ -1,19 +1,10 @@
 #include "fdm.hpp"
-#include "pde_boundary_conditions.hpp"
-#include "interface.hpp"
-#include <string>
-#include <vector>
-#include <iostream>
-#include <cmath>
-#include "math.h"
-#include <numeric>
-#include <functional>
 
 namespace dauphine
 {
 
-	fdm_interface::fdm_interface(pde* pde, payoff* pay, rate* r, double f0, double fN, int dt, int dx, double theta)
-		: m_pde(pde), m_payoff(pay), m_r(r), m_f0(f0), m_fN(fN), m_dt(dt), m_dx(dx), m_theta(theta)
+	fdm_interface::fdm_interface(pde* pde, payoff* pay, rate* r)
+		: m_pde(pde), m_payoff(pay), m_r(r)
 	{
 	}
 
@@ -25,53 +16,53 @@ namespace dauphine
 
 	}
 
-	double fdm_interface::a1(pde* pde,double s, double t) const
+	double fdm_interface::a1(pde* pde, double s, double t) const
 	{		
-        double alpha = (pde->diff_coeff())/(pow(m_dx, 2));
-		double beta = (pde->conv_coeff())/(2*m_dx);
+        double alpha = (pde->diff_coeff(s, t))/(pow(dx, 2));
+		double beta = (pde->conv_coeff(s, t))/(2*dx);
 		
-		return m_dt*(1-m_theta)*(beta-alpha);
+		return dt*(1-theta)*(beta-alpha);
 	}
 
 	double fdm_interface::a2(pde* pde, double s, double t) const
 	{
- 		double alpha = (pde->diff_coeff())/(pow(m_dx,2));
-        return (1 - (1 - m_theta)*m_dt*(m_r->get_rate(s, t) - 2*alpha));
+ 		double alpha = (pde->diff_coeff(s, t))/(pow(dx,2));
+        return (1 - (1 - theta)*dt*(m_r->get_rate(s, t) - 2*alpha));
 	}
 
 	double fdm_interface::a3(pde* pde, double s, double t) const
 	{
-		double alpha = (pde->diff_coeff())/(pow(m_dx, 2));
-		double beta=(pde->conv_coeff())/(2*m_dx);
+		double alpha = (pde->diff_coeff(s, t))/(pow(dx, 2));
+		double beta=(pde->conv_coeff(s, t))/(2*dx);
 		
-		return (-m_dt*(1-m_theta)*(beta+alpha));
+		return (-dt*(1-theta)*(beta+alpha));
 	}
 
 	double fdm_interface::b1(pde* pde, double s, double t) const
 	{
-		double alpha = (pde->diff_coeff())/(pow(m_dx, 2));
-		double beta=(pde->conv_coeff())/(2*m_dx);
+		double alpha = (pde->diff_coeff(s, t))/(pow(dx, 2));
+		double beta=(pde->conv_coeff(s, t))/(2*dx);
 		
-		return m_dt*m_theta*(alpha - beta);
+		return dt*theta*(alpha - beta);
 	}
 
 	double fdm_interface::b2(pde* pde, double s, double t) const
 	{
-        double alpha = (pde->diff_coeff())/(pow(m_dx, 2));
+        double alpha = (pde->diff_coeff(s, t))/(pow(dx, 2));
 			
-        return (1 + m_theta*m_dt*(m_r->get_rate(s, t) - 2*alpha));
+        return (1 + theta*dt*(m_r->get_rate(s, t) - 2*alpha));
 	}
 
 	double fdm_interface::b3(pde* pde, double s, double t) const
 	{
-		double alpha = (pde->diff_coeff())/(pow(m_dx, 2));
-		double beta=(pde->conv_coeff())/(2*m_dx);
+		double alpha = (pde->diff_coeff(s, t))/(pow(dx, 2));
+		double beta=(pde->conv_coeff(s, t))/(2*dx);
 
-		return m_dt*m_theta*(beta+alpha);
+		return dt*theta*(beta+alpha);
 	}
 
-	fdm::fdm(pde* pde, payoff* payoff, rate * r, double f0, double fN, int dt, int dx, double theta)
-		: fdm_interface(pde, payoff, r, f0, fN, dt, dx, theta)
+	fdm::fdm(pde* pde, payoff* payoff, rate* r)
+		: fdm_interface(pde, payoff, r)
     {
     }
 
@@ -84,19 +75,32 @@ namespace dauphine
 
 	double fdm::get_price(pde* pde, interface* opt, payoff* payoff, Space_boundaries* sb, Time_boundaries* tb) const
 	{
+        
+        double Smax = sb->s_boundary_right();
+        double Smin = sb->s_boundary_left();
+        double Tmax = tb->t_boundary_right(maturity);
+        double Tmin = tb->t_boundary_left(maturity);
+        
 		//Calcul avec FDM
 		//1. On discretise le temps et l'espace
-        std::size_t T = tb->time_mesh(m_dt, opt);
-        std::size_t N = sb->space_mesh(m_dx, opt);
+        std::size_t T = tb->time_mesh();
+        std::size_t N = sb->space_mesh();
 		double r0 = opt->get_rate(); //dependency in t & s?
 
 		//2. Calcul des f intermédiaires
 			
 		//Calcul de la matrice F en T
-        std::vector<double> F(N-1, payoff->get_payoff(opt->get_spot()));
+        
+        std::vector<double> F(N-1);
+        
+        for (int k = exp(Smin); k < exp(Smax); k)
+        {
+//            F[k] = ?;
+        }
+        
         	
 		//Calcul des coeffs des matrices tridiagonales en T
-		double mat = opt->get_maturity(); 
+		double mat = maturity;
 		//def matrice des coeffs pour avoir les coeffs en tt pt de l espace
 		std::vector<double> A1(N-1, 0.0);
 		std::vector<double> A2(N-1, 0.0);
@@ -104,10 +108,6 @@ namespace dauphine
 		std::vector<double> B1(N-1, 0.0);
 		std::vector<double> B2(N-1, 0.0);
 		std::vector<double> B3(N-1, 0.0);
-				
-		double Smax = sb->s_boundary_right(opt->get_spot(), opt->get_vol(), opt->get_maturity());
-		double Tmax =  tb->t_boundary_right(opt->get_maturity());
-		double Tmin =  tb->t_boundary_left(opt->get_maturity());
 
 		double s = exp(Smax);
 
@@ -120,15 +120,15 @@ namespace dauphine
 			B2[i] = b2(pde, s, mat);
 			B3[i] = b3(pde, s, mat);
 
-			s -= m_dx;
+			s -= dx;
 		}
 
 		//Calcul du terme constant que l'on extrait pour avoir une matrice tridiagonale
 		std::vector<double> C(N-1, 0.0);
 
-		C[0] = (A1[0] - B1[0]*exp(-r0*m_dt))*m_f0;
+		C[0] = (A1[0] - B1[0]*exp(-r0*dt))*f0;
 
-		C[N-2] = (A3[N-2] - B3[N-2]*exp(-r0*m_dt))*m_fN;
+		C[N-2] = (A3[N-2] - B3[N-2]*exp(-r0*dt))*fN;
 
 		//Calcul de la matrice D en T
 		std::vector<double> D(N-1,0.0);
@@ -149,7 +149,7 @@ namespace dauphine
 			//via l'algo de Thomas et le système trouvé
 			
 			//On calcule la matrice tridiagoname en t en tt pt de l'espace
-			for (unsigned long i=0; i < N-1; i++)
+			for (unsigned long i = 0; i < N-1; i++)
 			{
 				A1[i] = a1(pde, s, t);
 				A2[i] = a2(pde, s, t);
@@ -158,7 +158,7 @@ namespace dauphine
 				B2[i] = b2(pde, s, t);
 				B3[i] = b3(pde, s, t);
 
-				s -= m_dx;
+				s -= dx;
 			}
 
 
@@ -174,7 +174,11 @@ namespace dauphine
 				D[i] = A1[i]*F[i-1] + A2[i]*F[i] + A3[i]*F[i+1];
 			}
 		}
-
+        for (std::size_t i = 0; i < F.size(); ++i)
+        {
+            std::cout<<F[i]<<std::endl;
+        }
+        
 		return F[F.size() - 1];
 	}
 
@@ -211,127 +215,127 @@ namespace dauphine
 		return y;
 	}
 
-    double fdm::get_delta(pde* t_pde,
-                     interface* opt,
-                     payoff* payoff,
-                     Space_boundaries* sb,
-                     Time_boundaries* tb) const
-    {
-        double spot_plus = opt->get_spot() + 0.01;
-        double spot_minus = opt->get_spot() - 0.01;
-        
-        interface* opt_plus = new interface(*opt);
-        opt_plus->set_spot(spot_plus);
-        
-        interface* opt_minus = new interface(*opt);
-        opt_minus->set_spot(spot_minus);
-        
-        pde* pde_plus = new bs_pde(opt_plus); // problème
-        pde* pde_minus = new bs_pde(opt_minus);
-        
-        double p_plus = get_price(pde_plus, opt_plus, payoff, sb, tb);
-        double p_minus = get_price(pde_minus, opt_minus, payoff, sb, tb);
-        
-        delete pde_plus;
-        delete pde_minus;
-        delete opt_plus;
-        delete opt_minus;
-        
-        return (p_plus - p_minus)/0.02;
-    }
-
-    double fdm::get_gamma(pde* t_pde,
-                     interface* opt,
-                     payoff* payoff,
-                     Space_boundaries* sb,
-                     Time_boundaries* tb) const
-    {
-        double spot_plus = opt->get_spot() + 0.01;
-        double spot_minus = opt->get_spot() - 0.01;
-        
-        interface* opt_plus = new interface(*opt);
-        opt_plus->set_spot(spot_plus);
-        
-        interface* opt_minus = new interface(*opt);
-        opt_minus->set_spot(spot_minus);
-        
-        pde* pde_plus = new bs_pde(opt_plus);
-        pde* pde_minus = new bs_pde(opt_minus);
-        
-        double p = get_price(t_pde, opt, payoff, sb, tb);
-        double p_plus = get_price(pde_plus, opt_plus, payoff, sb, tb);
-        double p_minus = get_price(pde_minus, opt_minus, payoff, sb, tb);
-        
-        delete pde_plus;
-        delete pde_minus;
-        delete opt_plus;
-        delete opt_minus;
-        
-        return (p_plus - 2*p + p_minus)/(0.01*0.01);
-    }
-
-    double fdm::get_theta(pde* t_pde,
-                          interface* opt,
-                          payoff* payoff,
-                          Space_boundaries* sb,
-                          Time_boundaries* tb) const
-    {
-        double t_plus = opt->get_maturity() + 0.003;
-        double t_minus = opt->get_maturity() - 0.003;
-        
-        interface* opt_plus = new interface(*opt);
-        opt_plus->set_maturity(t_plus);
-        
-        interface* opt_minus = new interface(*opt);
-        opt_minus->set_maturity(t_minus);
-        
-        pde* pde_plus = new bs_pde(opt_plus);
-        pde* pde_minus = new bs_pde(opt_minus);
-        
-        double p_plus = get_price(pde_plus, opt_plus, payoff, sb, tb);
-        double p_minus = get_price(pde_minus, opt_minus, payoff, sb, tb);
-        std::cout << p_plus << std::endl;
-        std::cout << p_minus << std::endl;
-        
-        delete pde_plus;
-        delete pde_minus;
-        delete opt_plus;
-        delete opt_minus;
-        
-        return (p_plus - p_minus)/0.006;
-    }
-
-
-    double fdm::get_vega(pde* t_pde,
-                          interface* opt,
-                          payoff* payoff,
-                          Space_boundaries* sb,
-                          Time_boundaries* tb) const
-    {
-        volatility* sig_plus = new vol_cst(opt->get_vol() + 0.01);
-        volatility* sig_minus = new vol_cst(opt->get_vol() - 0.01);
-        
-        interface* opt_plus = new interface(*opt);
-        opt_plus->set_vol(sig_plus);
-        
-        interface* opt_minus = new interface(*opt);
-        opt_minus->set_vol(sig_minus);
-        
-        pde* pde_plus = new bs_pde(opt_plus);
-        pde* pde_minus = new bs_pde(opt_minus);
-        
-        double p_plus = get_price(pde_plus, opt_plus, payoff, sb, tb);
-        double p_minus = get_price(pde_minus, opt_minus, payoff, sb, tb);
-        std::cout << p_plus << std::endl;
-        std::cout << p_minus << std::endl;
-        
-        delete pde_plus;
-        delete pde_minus;
-        delete opt_plus;
-        delete opt_minus;
-        
-        return (p_plus - p_minus)/0.02;
-    }
+//    double fdm::get_delta(pde* t_pde,
+//                     interface* opt,
+//                     payoff* payoff,
+//                     Space_boundaries* sb,
+//                     Time_boundaries* tb) const
+//    {
+//        double spot_plus = spot + 0.01;
+//        double spot_minus = spot - 0.01;
+//
+//        interface* opt_plus = new interface(*opt);
+//        opt_plus->set_spot(spot_plus);
+//
+//        interface* opt_minus = new interface(*opt);
+//        opt_minus->set_spot(spot_minus);
+//
+//        pde* pde_plus = new bs_pde(opt_plus); // problème
+//        pde* pde_minus = new bs_pde(opt_minus);
+//
+//        double p_plus = get_price(pde_plus, opt_plus, payoff, sb, tb);
+//        double p_minus = get_price(pde_minus, opt_minus, payoff, sb, tb);
+//
+//        delete pde_plus;
+//        delete pde_minus;
+//        delete opt_plus;
+//        delete opt_minus;
+//
+//        return (p_plus - p_minus)/0.02;
+//    }
+//
+//    double fdm::get_gamma(pde* t_pde,
+//                     interface* opt,
+//                     payoff* payoff,
+//                     Space_boundaries* sb,
+//                     Time_boundaries* tb) const
+//    {
+//        double spot_plus = spot + 0.01;
+//        double spot_minus = spot - 0.01;
+//
+//        interface* opt_plus = new interface(*opt);
+//        opt_plus->set_spot(spot_plus);
+//
+//        interface* opt_minus = new interface(*opt);
+//        opt_minus->set_spot(spot_minus);
+//
+//        pde* pde_plus = new bs_pde(opt_plus);
+//        pde* pde_minus = new bs_pde(opt_minus);
+//
+//        double p = get_price(t_pde, opt, payoff, sb, tb);
+//        double p_plus = get_price(pde_plus, opt_plus, payoff, sb, tb);
+//        double p_minus = get_price(pde_minus, opt_minus, payoff, sb, tb);
+//
+//        delete pde_plus;
+//        delete pde_minus;
+//        delete opt_plus;
+//        delete opt_minus;
+//
+//        return (p_plus - 2*p + p_minus)/(0.01*0.01);
+//    }
+//
+//    double fdm::get_theta(pde* t_pde,
+//                          interface* opt,
+//                          payoff* payoff,
+//                          Space_boundaries* sb,
+//                          Time_boundaries* tb) const
+//    {
+//        double t_plus = maturity + 0.003;
+//        double t_minus = maturity - 0.003;
+//
+//        interface* opt_plus = new interface(*opt);
+//        opt_plus->set_maturity(t_plus);
+//
+//        interface* opt_minus = new interface(*opt);
+//        opt_minus->set_maturity(t_minus);
+//
+//        pde* pde_plus = new bs_pde(opt_plus);
+//        pde* pde_minus = new bs_pde(opt_minus);
+//
+//        double p_plus = get_price(pde_plus, opt_plus, payoff, sb, tb);
+//        double p_minus = get_price(pde_minus, opt_minus, payoff, sb, tb);
+//        std::cout << p_plus << std::endl;
+//        std::cout << p_minus << std::endl;
+//
+//        delete pde_plus;
+//        delete pde_minus;
+//        delete opt_plus;
+//        delete opt_minus;
+//
+//        return (p_plus - p_minus)/0.006;
+//    }
+//
+//
+//    double fdm::get_vega(pde* t_pde,
+//                          interface* opt,
+//                          payoff* payoff,
+//                          Space_boundaries* sb,
+//                          Time_boundaries* tb) const
+//    {
+//        volatility* sig_plus = new vol_cst(opt->get_vol(0., 0.) + 0.01);
+//        volatility* sig_minus = new vol_cst(opt->get_vol(0., 0.) - 0.01);
+//
+//        interface* opt_plus = new interface(*opt);
+//        opt_plus->set_vol(sig_plus);
+//
+//        interface* opt_minus = new interface(*opt);
+//        opt_minus->set_vol(sig_minus);
+//
+//        pde* pde_plus = new bs_pde(opt_plus);
+//        pde* pde_minus = new bs_pde(opt_minus);
+//
+//        double p_plus = get_price(pde_plus, opt_plus, payoff, sb, tb);
+//        double p_minus = get_price(pde_minus, opt_minus, payoff, sb, tb);
+//        std::cout << p_plus << std::endl;
+//        std::cout << p_minus << std::endl;
+//
+//        delete pde_plus;
+//        delete pde_minus;
+//        delete opt_plus;
+//        delete opt_minus;
+//
+//        return (p_plus - p_minus)/0.02;
+//    }
 
 
 }

@@ -6,6 +6,7 @@
 #include "fdm.hpp"
 #include "rate.hpp"
 #include "volatility.hpp"
+#include "global.hpp"
 // #include "volatility.hpp"
 
 
@@ -33,45 +34,40 @@
 
 namespace dauphine {
 
+
     void test()
     {
-        double strike = 100;
-        double spot = 150;
-        double maturity = 10; // in years
-        double f0 = 1.;
-        double fN = 200.;
-        int dt = 1;
-        int dx = 1;
-        double theta = 0.5;
-
-        rate* rate = new rate_cst(0.01);
-        volatility* vol = new vol_cst(0.2);
-                
-        payoff* c = new call(strike);
-        interface* option = new interface(spot, rate, maturity, vol, c);
-        pde* eq = new bs_pde(option);
         Space_boundaries* sb = new Sboundaries();
         Time_boundaries* tb = new Tboundaries();
-        fdm_interface* f = new fdm(eq, c, rate, f0, fN, dt, dx, theta);
+        payoff* c = new call(strike);
+        rate* rate = new rate_cst(0.01);
+        
+        interface* option = new interface(rate, c);
+        
+        volatility* vol = new vol_cst(sb, tb);
+        
+        pde* eq = new bs_pde(option, vol);
+        fdm_interface* f = new fdm(eq, c, rate);
+        
 
         std::cout << "Rate: " << rate->get_rate(0,0) << std::endl;
         std::cout << "Payoff: " << c->get_payoff(spot) << std::endl;
         std::cout << "FDM Price: " << f->get_price(eq, option, c, sb, tb) << std::endl;
-        std::cout << "BS Price: " << bs_price(spot, strike, vol->get_sigma(0., 0.), maturity, true) << std::endl;
-        std::cout << "Delta: " << f->get_delta(eq, option, c, sb, tb) << std::endl;
-        std::cout << "Gamma: " << f->get_gamma(eq, option, c, sb, tb) << std::endl;
-        std::cout << "Theta: " << f->get_theta(eq, option, c, sb, tb) << std::endl;
-	std::cout << "Vega: " << f->get_vega(eq, option, c, sb, tb) << std::endl;
+        std::cout << "BS Price: " << bs_price(spot, strike, initial_sigma, maturity, true) << std::endl;
+//        std::cout << "Delta: " << f->get_delta(eq, option, c, sb, tb) << std::endl;
+//        std::cout << "Gamma: " << f->get_gamma(eq, option, c, sb, tb) << std::endl;
+//        std::cout << "Theta: " << f->get_theta(eq, option, c, sb, tb) << std::endl;
+//        std::cout << "Vega: " << f->get_vega(eq, option, c, sb, tb) << std::endl;
 
         
         delete f;
+        delete eq;
+        delete vol;
+        delete option;
+        delete rate;
+        delete c;
         delete tb;
         delete sb;
-        delete eq;
-        delete option;
-        delete c;
-        delete vol;
-        delete rate;
 
     }
 }

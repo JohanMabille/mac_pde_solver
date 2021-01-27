@@ -4,6 +4,10 @@
 #include <cstddef>
 #include <vector>
 #include "interface.hpp"
+#include "volatility.hpp"
+#include "global.hpp"
+
+
 namespace dauphine
 {
 
@@ -16,8 +20,8 @@ namespace dauphine
         
         // PDE Coefficients
         virtual double first_coeff() const = 0;
-        virtual double diff_coeff() const = 0;
-        virtual double conv_coeff() const = 0;
+        virtual double diff_coeff(double s, double t) const = 0;
+        virtual double conv_coeff(double s, double t) const = 0;
         virtual double zero_coeff() const = 0; 
         virtual double source_coeff() const = 0;
 
@@ -28,18 +32,20 @@ namespace dauphine
         
     public:
         
-        bs_pde(interface* option); //added to match the cpp file, please review
+        bs_pde(interface* option, volatility* vol); //added to match the cpp file, please review
         virtual ~bs_pde();
         
         double first_coeff() const override;
-        double diff_coeff() const override;
-        double conv_coeff() const override;
+        double diff_coeff(double s, double t) const override;
+        double conv_coeff(double s, double t) const override;
         double zero_coeff() const override;
         double source_coeff() const override;
     
     private:
         
-        interface* opt;
+        interface* m_opt;
+        volatility* m_vol;
+//        rate* m_rate;
     };
 
 }

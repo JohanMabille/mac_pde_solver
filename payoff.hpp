@@ -1,6 +1,7 @@
 #ifndef PAYOFF_HPP
 #define PAYOFF_HPP
 
+#include "global.hpp"
 
 #include <string>
 #include <vector>
@@ -15,7 +16,7 @@ namespace dauphine
         //Classe qui encapsule les payoffs
         //Logique de sémantique d'entité car payoff different pour chaque option
 	public: //Constructeurs et destructeurs virtuels
-       		explicit payoff();
+        explicit payoff();
 		virtual ~payoff();
 		virtual double get_payoff(const double S) = 0;
     };

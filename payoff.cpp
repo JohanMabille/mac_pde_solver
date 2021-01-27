@@ -1,8 +1,4 @@
 #include "payoff.hpp"
-#include <iostream>
-#include <string>
-#include <vector>
-#include <cmath>
 
 namespace dauphine
 {
