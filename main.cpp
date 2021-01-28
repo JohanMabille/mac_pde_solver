@@ -7,7 +7,6 @@
 #include "rate.hpp"
 #include "volatility.hpp"
 #include "global.hpp"
-// #include "volatility.hpp"
 
 
 // Guidelines:
@@ -40,20 +39,21 @@ namespace dauphine {
         Space_boundaries* sb = new Sboundaries();
         Time_boundaries* tb = new Tboundaries();
         payoff* c = new call(strike);
-        rate* rate = new rate_cst(0.01);
-        
-        interface* option = new interface(rate, c);
+               
+        interface* option = new interface(c); 
         
         volatility* vol = new vol_cst(sb, tb);
+	rate* r = new rate_cst(sb, tb);
         
-        pde* eq = new bs_pde(option, vol);
-        fdm_interface* f = new fdm(eq, c, rate);
-        
-
-        std::cout << "Rate: " << rate->get_rate(0,0) << std::endl;
+        pde* eq = new bs_pde(vol, r);
+        fdm_interface* f = new fdm(eq, c);
+	        
         std::cout << "Payoff: " << c->get_payoff(spot) << std::endl;
-        std::cout << "FDM Price: " << f->get_price(eq, option, c, sb, tb) << std::endl;
+        std::cout << "FDM Price: " << f->get_price(eq, option, c, sb, tb, r) << std::endl;
         std::cout << "BS Price: " << bs_price(spot, strike, initial_sigma, maturity, true) << std::endl;
+	std::cout << "rate " << vol->get_sigma(1, 1) <<std::endl;
+
+
 //        std::cout << "Delta: " << f->get_delta(eq, option, c, sb, tb) << std::endl;
 //        std::cout << "Gamma: " << f->get_gamma(eq, option, c, sb, tb) << std::endl;
 //        std::cout << "Theta: " << f->get_theta(eq, option, c, sb, tb) << std::endl;
@@ -62,12 +62,12 @@ namespace dauphine {
         
         delete f;
         delete eq;
-        delete vol;
         delete option;
-        delete rate;
         delete c;
         delete tb;
         delete sb;
+	delete r; 
+	delete vol;
 
     }
 }

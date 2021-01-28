@@ -12,6 +12,7 @@
 #include "pde_boundary_conditions.hpp"
 #include "interface.hpp"
 #include "global.hpp"
+#include "rate.hpp"
 
 
 namespace dauphine
@@ -19,18 +20,18 @@ namespace dauphine
 	class fdm_interface
 	{
 	public:
-		fdm_interface(pde* pde, payoff* pay, rate* r);
+		fdm_interface(pde* pde, payoff* pay);
 		virtual ~fdm_interface();
 		virtual double a1(pde* pde, double s, double t) const;
-		virtual double a2(pde* pde, double s, double t) const;
+		virtual double a2(pde* pde, double s, double t, rate* r) const;
 		virtual double a3(pde* pde, double s, double t) const;			
 		virtual double b1(pde* pde, double s, double t) const;
-		virtual double b2(pde* pde, double s, double t) const;
+		virtual double b2(pde* pde, double s, double t, rate* r) const;
 		virtual double b3(pde* pde, double s, double t) const;
 		
         virtual std::vector<double> thomas(const std::vector<double> a, const std::vector<double> b, const std::vector<double> c,  std::vector<double> d) const = 0;
         
-		virtual double get_price(pde* pde, interface* opt, payoff* payoff, Space_boundaries* sb, Time_boundaries* tb) const = 0;
+	virtual double get_price(pde* pde, interface* opt, payoff* payoff, Space_boundaries* sb, Time_boundaries* tb, rate* r) const = 0;
         
 //        virtual double get_delta(pde* pde,
 //                                 interface* opt,
@@ -60,13 +61,12 @@ namespace dauphine
     	protected:
         	pde* m_pde;
         	payoff* m_payoff;
-        	rate* m_r;
-	};
+  	};
 	
 	class fdm : public fdm_interface
 	{
 	public:
-		fdm(pde* pde, payoff* payoff, rate * r);
+		fdm(pde* pde, payoff* payoff);
 		~fdm();
 
 		std::vector<double> thomas(const std::vector<double> a,
@@ -78,7 +78,7 @@ namespace dauphine
                          interface* opt,
                          payoff* payoff,
                          Space_boundaries* sb,
-                         Time_boundaries* tb) const override;
+                         Time_boundaries* tb, rate* r) const override;
         
 //        double get_delta(pde* t_pde,
 //                         interface* opt,

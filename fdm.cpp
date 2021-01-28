@@ -3,15 +3,14 @@
 namespace dauphine
 {
 
-	fdm_interface::fdm_interface(pde* pde, payoff* pay, rate* r)
-		: m_pde(pde), m_payoff(pay), m_r(r)
+	fdm_interface::fdm_interface(pde* pde, payoff* pay)
+		: m_pde(pde), m_payoff(pay)
 	{
 	}
 
 	fdm_interface::~fdm_interface()
 	{
 		delete m_pde; //destruction du pointeur
-		delete m_r;
 		delete m_payoff;
 
 	}
@@ -24,10 +23,10 @@ namespace dauphine
 		return dt*(1-theta)*(beta-alpha);
 	}
 
-	double fdm_interface::a2(pde* pde, double s, double t) const
+	double fdm_interface::a2(pde* pde, double s, double t, rate* r) const
 	{
  		double alpha = (pde->diff_coeff(s, t))/(pow(dx,2));
-        return (1 - (1 - theta)*dt*(m_r->get_rate(s, t) - 2*alpha));
+        return (1 - (1 - theta)*dt*(r->get_rate(s,t) - 2*alpha));
 	}
 
 	double fdm_interface::a3(pde* pde, double s, double t) const
@@ -46,11 +45,11 @@ namespace dauphine
 		return dt*theta*(alpha - beta);
 	}
 
-	double fdm_interface::b2(pde* pde, double s, double t) const
+	double fdm_interface::b2(pde* pde, double s, double t, rate* r) const
 	{
         double alpha = (pde->diff_coeff(s, t))/(pow(dx, 2));
 			
-        return (1 + theta*dt*(m_r->get_rate(s, t) - 2*alpha));
+        return (1 + theta*dt*(r->get_rate(s,t) - 2*alpha));
 	}
 
 	double fdm_interface::b3(pde* pde, double s, double t) const
@@ -61,19 +60,18 @@ namespace dauphine
 		return dt*theta*(beta+alpha);
 	}
 
-	fdm::fdm(pde* pde, payoff* payoff, rate* r)
-		: fdm_interface(pde, payoff, r)
+	fdm::fdm(pde* pde, payoff* payoff)
+		: fdm_interface(pde, payoff)
     {
     }
 
 	fdm::~fdm()
 	{
 		m_pde = nullptr;
-		m_r = nullptr;
 		m_payoff = nullptr;
 	}
 
-	double fdm::get_price(pde* pde, interface* opt, payoff* payoff, Space_boundaries* sb, Time_boundaries* tb) const
+	double fdm::get_price(pde* pde, interface* opt, payoff* payoff, Space_boundaries* sb, Time_boundaries* tb, rate* r) const
 	{
         
         double Smax = sb->s_boundary_right();
@@ -85,18 +83,28 @@ namespace dauphine
 		//1. On discretise le temps et l'espace
         std::size_t T = tb->time_mesh();
         std::size_t N = sb->space_mesh();
-		double r0 = opt->get_rate(); //dependency in t & s?
+	double r0 = initial_rate;
 
 		//2. Calcul des f intermédiaires
 			
 		//Calcul de la matrice F en T
         
-        std::vector<double> F(N-1);
-        
-        for (int k = exp(Smin); k < exp(Smax); k)
+	std::vector<double> F(N-1, payoff->get_payoff(spot));
+        /*std::vector<double> F(N-1);
+        double S = Smin;
+	
+	std::cout << "N-1 " << N-1 << std::endl;
+
+        for (int i = 0; i < F.size(); i++)
         {
-//            F[k] = ?;
-        }
+
+            F[i] = payoff //->get_payoff(spot);
+	    S = S + dx;
+	    std::cout << "payoff " << F[i] << std::endl;
+	    //std::cout << "S " << S << std::endl;
+
+
+  	}*/
         
         	
 		//Calcul des coeffs des matrices tridiagonales en T
@@ -109,18 +117,18 @@ namespace dauphine
 		std::vector<double> B2(N-1, 0.0);
 		std::vector<double> B3(N-1, 0.0);
 
-		double s = exp(Smax);
+		double s = Smax;
 
 		for (std::size_t i=0; i < N-1; i++)
 		{
 			A1[i] = a1(pde, s, mat);
-			A2[i] = a2(pde, s, mat);
+			A2[i] = a2(pde, s, mat, r);
 			A3[i] = a3(pde, s, mat);
 			B1[i] = b1(pde, s, mat);
-			B2[i] = b2(pde, s, mat);
+			B2[i] = b2(pde, s, mat, r);
 			B3[i] = b3(pde, s, mat);
-
-			s -= dx;
+		
+			s = s /exp(dx);
 		}
 
 		//Calcul du terme constant que l'on extrait pour avoir une matrice tridiagonale
@@ -138,10 +146,12 @@ namespace dauphine
 		for (std::size_t i=1; i < N-2; i++)
 		{
 			D[i] = A1[i]*F[i-1] + A2[i]*F[i] + A3[i]*F[i+1];
+			std::cout<<"D" <<D[i]<<std::endl;
+
 		}
 
 		//On remonte via l'algorithme de Thomas
-		s = exp(Smax);
+		s = Smax; //exp(Smax);
 
 		for (int t = T-1; t>=0 ; t--)
 		{
@@ -152,13 +162,13 @@ namespace dauphine
 			for (unsigned long i = 0; i < N-1; i++)
 			{
 				A1[i] = a1(pde, s, t);
-				A2[i] = a2(pde, s, t);
+				A2[i] = a2(pde, s, t, r);
 				A3[i] = a3(pde, s, t);
 				B1[i] = b1(pde, s, t);
-				B2[i] = b2(pde, s, t);
+				B2[i] = b2(pde, s, t, r);
 				B3[i] = b3(pde, s, t);
-
-				s -= dx;
+			
+				s = s /exp(dx);
 			}
 
 

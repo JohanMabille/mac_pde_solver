@@ -43,6 +43,7 @@ namespace dauphine
             for (int j = 0; j < nb_cols; ++j)
             {
                 m_volatility[i*nb_rows + j] = initial_sigma;
+		
             }
         }
     }
