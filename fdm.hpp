@@ -31,7 +31,10 @@ namespace dauphine
 		
         virtual std::vector<double> thomas(const std::vector<double> a, const std::vector<double> b, const std::vector<double> c,  std::vector<double> d) const = 0;
         
-	virtual double get_price(pde* pde, interface* opt, payoff* payoff, Space_boundaries* sb, Time_boundaries* tb, rate* r) const = 0;
+	virtual std::vector<double> get_price_list(pde* pde, interface* opt, payoff* payoff, Space_boundaries* sb, Time_boundaries* tb, rate* r) const = 0;
+
+	virtual double get_price(std::vector<double> price_list) const = 0;
+
         
 //        virtual double get_delta(pde* pde,
 //                                 interface* opt,
@@ -74,11 +77,13 @@ namespace dauphine
                                    const std::vector<double> c,
                                    std::vector<double> d) const override;
 		
-        double get_price(pde* t_pde,
+		std::vector<double> get_price_list(pde* t_pde,
                          interface* opt,
                          payoff* payoff,
                          Space_boundaries* sb,
                          Time_boundaries* tb, rate* r) const override;
+
+		double get_price(std::vector<double> price_list) const override;
         
 //        double get_delta(pde* t_pde,
 //                         interface* opt,
