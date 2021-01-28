@@ -7,7 +7,7 @@ namespace dauphine
 	double Sboundaries::s_boundary_left() const
 	{
     		double lower_boundary = log(spot) - 5*initial_sigma*sqrt(maturity);
-    		return lower_boundary;
+    		return lower_boundary; //on a x=log(s)
 	}
 
 	double Sboundaries::s_boundary_right() const
@@ -20,7 +20,7 @@ namespace dauphine
 	{
 		double S_max = s_boundary_right();
 		double S_min = s_boundary_left();
-		return (S_max-S_min)/dx;	
+		return floor((S_max-S_min)/dx);	
 	}
 
 

@@ -39,19 +39,32 @@ namespace dauphine {
         Space_boundaries* sb = new Sboundaries();
         Time_boundaries* tb = new Tboundaries();
         payoff* c = new call(strike);
-               
-        interface* option = new interface(c); 
+
+	interface* option = new interface(c); 
         
         volatility* vol = new vol_cst(sb, tb);
+	 
+
 	rate* r = new rate_cst(sb, tb);
-        
+       
         pde* eq = new bs_pde(vol, r);
         fdm_interface* f = new fdm(eq, c);
+
 	        
         std::cout << "Payoff: " << c->get_payoff(spot) << std::endl;
-        std::cout << "FDM Price: " << f->get_price(eq, option, c, sb, tb, r) << std::endl;
-        std::cout << "BS Price: " << bs_price(spot, strike, initial_sigma, maturity, true) << std::endl;
-	std::cout << "rate " << vol->get_sigma(1, 1) <<std::endl;
+
+	std::vector<double> price_list = f->get_price_list(eq, option, c, sb, tb, r);
+
+	std::cout << "Price List: " << std::endl;
+	for (std::size_t i=0; i<price_list.size(); i++)
+	{
+		std::cout << price_list[i] << std::endl;
+
+	}
+
+	std::cout << "Price at the input Spot: " << f->get_price(price_list) << std::endl;
+        
+	std::cout << "BS Price: " << bs_price(spot, strike, initial_sigma, maturity, true) << std::endl;
 
 
 //        std::cout << "Delta: " << f->get_delta(eq, option, c, sb, tb) << std::endl;

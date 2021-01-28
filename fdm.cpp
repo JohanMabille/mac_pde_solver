@@ -71,11 +71,11 @@ namespace dauphine
 		m_payoff = nullptr;
 	}
 
-	double fdm::get_price(pde* pde, interface* opt, payoff* payoff, Space_boundaries* sb, Time_boundaries* tb, rate* r) const
+	std::vector<double> fdm::get_price_list(pde* pde, interface* opt, payoff* payoff, Space_boundaries* sb, Time_boundaries* tb, rate* r) const
 	{
         
-        double Smax = sb->s_boundary_right();
-        double Smin = sb->s_boundary_left();
+        double Smax = exp(sb->s_boundary_right());
+        double Smin = exp(sb->s_boundary_left());
         double Tmax = tb->t_boundary_right(maturity);
         double Tmin = tb->t_boundary_left(maturity);
         
@@ -89,22 +89,15 @@ namespace dauphine
 			
 		//Calcul de la matrice F en T
         
-	std::vector<double> F(N-1, payoff->get_payoff(spot));
-        /*std::vector<double> F(N-1);
-        double S = Smin;
+	std::vector<double> F(N-1);
+	double S = Smin;
 	
-	std::cout << "N-1 " << N-1 << std::endl;
-
-        for (int i = 0; i < F.size(); i++)
-        {
-
-            F[i] = payoff //->get_payoff(spot);
-	    S = S + dx;
-	    std::cout << "payoff " << F[i] << std::endl;
-	    //std::cout << "S " << S << std::endl;
-
-
-  	}*/
+	for (std::size_t i = 0; i < F.size(); i++)
+        { 
+	
+            F[i] = payoff->get_payoff(S);
+	    S = S * exp(dx);
+  	}
         
         	
 		//Calcul des coeffs des matrices tridiagonales en T
@@ -117,18 +110,18 @@ namespace dauphine
 		std::vector<double> B2(N-1, 0.0);
 		std::vector<double> B3(N-1, 0.0);
 
-		double s = Smax;
+		S = Smax;
 
 		for (std::size_t i=0; i < N-1; i++)
 		{
-			A1[i] = a1(pde, s, mat);
-			A2[i] = a2(pde, s, mat, r);
-			A3[i] = a3(pde, s, mat);
-			B1[i] = b1(pde, s, mat);
-			B2[i] = b2(pde, s, mat, r);
-			B3[i] = b3(pde, s, mat);
+			A1[i] = a1(pde, S, mat);
+			A2[i] = a2(pde, S, mat, r);
+			A3[i] = a3(pde, S, mat);
+			B1[i] = b1(pde, S, mat);
+			B2[i] = b2(pde, S, mat, r);
+			B3[i] = b3(pde, S, mat);
 		
-			s = s /exp(dx);
+			S = S *exp(-dx);
 		}
 
 		//Calcul du terme constant que l'on extrait pour avoir une matrice tridiagonale
@@ -146,12 +139,10 @@ namespace dauphine
 		for (std::size_t i=1; i < N-2; i++)
 		{
 			D[i] = A1[i]*F[i-1] + A2[i]*F[i] + A3[i]*F[i+1];
-			std::cout<<"D" <<D[i]<<std::endl;
-
 		}
 
 		//On remonte via l'algorithme de Thomas
-		s = Smax; //exp(Smax);
+		S = Smax;
 
 		for (int t = T-1; t>=0 ; t--)
 		{
@@ -159,16 +150,16 @@ namespace dauphine
 			//via l'algo de Thomas et le système trouvé
 			
 			//On calcule la matrice tridiagoname en t en tt pt de l'espace
-			for (unsigned long i = 0; i < N-1; i++)
+			for (std::size_t i = 0; i < N-1; i++)
 			{
-				A1[i] = a1(pde, s, t);
-				A2[i] = a2(pde, s, t, r);
-				A3[i] = a3(pde, s, t);
-				B1[i] = b1(pde, s, t);
-				B2[i] = b2(pde, s, t, r);
-				B3[i] = b3(pde, s, t);
+				A1[i] = a1(pde, S, t);
+				A2[i] = a2(pde, S, t, r);
+				A3[i] = a3(pde, S, t);
+				B1[i] = b1(pde, S, t);
+				B2[i] = b2(pde, S, t, r);
+				B3[i] = b3(pde, S, t);
 			
-				s = s /exp(dx);
+				S = S * exp(-dx);
 			}
 
 
@@ -179,17 +170,21 @@ namespace dauphine
 			D[0] = A2[0]*F[0] + A3[0]*F[1] + C[0];
 			D[N-2] = A1[N-2]*F[N-2] + A2[N-2]*F[N-2] + C[N-2];
 		
-			for (unsigned long i=1; i < N-2; i++)
+			for (std::size_t i=1; i < N-2; i++)
 			{
 				D[i] = A1[i]*F[i-1] + A2[i]*F[i] + A3[i]*F[i+1];
 			}
 		}
-        for (std::size_t i = 0; i < F.size(); ++i)
-        {
-            std::cout<<F[i]<<std::endl;
-        }
+
+		return F;
         
-		return F[F.size() - 1];
+	}
+
+	double fdm::get_price(std::vector<double> price_list) const
+	{
+		double p = price_list[floor((price_list.size() )/2)];
+		return p;
+	
 	}
 
 
