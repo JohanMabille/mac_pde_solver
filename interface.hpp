@@ -7,7 +7,7 @@
 #include <cmath>
 
 #include "payoff.hpp"
-#include "rate.hpp"
+//#include "rate.hpp"
 //#include "volatility.hpp"
 #include "global.hpp"
 
@@ -17,7 +17,7 @@ namespace dauphine
 	class interface
 	{
     public:
-        interface(rate* r, payoff* pay);
+        interface(payoff* pay);
         ~interface();
         
         double get_rate();
@@ -32,7 +32,7 @@ namespace dauphine
 	        
     protected:
         payoff* m_payoff;
-        rate* m_rate;
+      
 	};
 
 }

@@ -4,26 +4,25 @@
 namespace dauphine
 {
 
-	interface::interface(rate* r, payoff* pay)
-    : m_rate(r), m_payoff(pay)
+	interface::interface(payoff* pay)
+    :  m_payoff(pay)
 	{
         	std::cout<<"interface constructor"<<std::endl;
 	}
 
     interface::~interface()
     {
-        m_rate = nullptr;
         m_payoff = nullptr;
         std::cout<<"interface destructor"<<std::endl;
     }
 
-    double interface::get_rate()
-    {
-        double s = 0;
-        double t = 0;
+//    double interface::get_rate()
+//    {
+  //      double s = 0;
+    //    double t = 0;
     
-        return m_rate->get_rate(s, t);
-    }
+      //  return m_rate->get_rate(s, t);
+    //}
 
 //    double interface::get_maturity()
 //    {

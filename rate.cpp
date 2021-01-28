@@ -1,15 +1,12 @@
-#include <string>
-#include <vector>
-#include <iostream>
-#include <cmath>
-#include <numeric>
-#include <functional>
-#include <stdio.h>
 #include "rate.hpp"
 
 namespace dauphine{
 
-	rate::rate()
+	rate::rate(Space_boundaries* sb,Time_boundaries* tb)
+    		: m_rate(sb->space_mesh()*tb->time_mesh())
+    		, nb_cols(tb->time_mesh())
+    		, nb_rows(sb->space_mesh())
+
 	{
 		std::cout << "constructeur rate" << std::endl;
 	}
@@ -19,24 +16,34 @@ namespace dauphine{
 		std::cout << "destructeur rate" << std::endl;
 	}
 
-	double rate::get_rate(double s, double t)
-	{
-	}
+	double rate::get_rate(double s, double t) const
+    	{
+       		return m_rate[s*nb_rows + t];
+   	}
 
-	rate_cst::rate_cst(double initial_rate)
-		: rate(initial_rate)
-	{
+	rate_cst::rate_cst(Space_boundaries* sb,
+                     Time_boundaries* tb)
+    	: rate(sb, tb)
+    	{
+        	rate_build();
         	std::cout << "constructeur rate cst" << std::endl;
     	}
 
-	rate_cst::~rate_cst()
-	{
-		std::cout << "destructeur rate cst" << std::endl;
-	}
+    	rate_cst::~rate_cst()
+    	{
+        	std::cout << "destructeur rate cst" << std::endl;
+    	}
 
-	double rate_cst::get_rate(double s, double t) //returns the rate for the specific space s and time t
-	{
-    		return rate_cst::rate;
-	}
+    	void rate_cst::rate_build()
+    	{
+        	for (int i = 0; i < nb_rows; ++i)
+        	{
+            		for (int j = 0; j < nb_cols; ++j)
+            		{
+                		m_rate[i*nb_rows + j] = initial_rate;
+				
+            		}
+        	}
+    	}
 
 }

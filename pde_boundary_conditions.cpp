@@ -20,7 +20,7 @@ namespace dauphine
 	{
 		double S_max = s_boundary_right();
 		double S_min = s_boundary_left();
-		return floor((S_max-S_min)/dx);	
+		return (S_max-S_min)/dx;	
 	}
 
 

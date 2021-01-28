@@ -6,6 +6,7 @@ namespace dauphine
 
     static double strike = 100.;
     static double initial_sigma = 0.18;
+    static double initial_rate = 0.01;
     static double spot = 110.;
     static double maturity = 5.; // in years
     static double f0 = 1.;
