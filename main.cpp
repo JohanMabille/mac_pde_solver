@@ -52,8 +52,9 @@ namespace dauphine {
 
 	        
         std::cout << "Payoff: " << c->get_payoff(spot) << std::endl;
+        
 
-	std::vector<double> price_list = f->get_price_list(eq, option, c, sb, tb, r);       //delete redundancy of eq, c and r
+	std::vector<double> price_list = f->get_price_list(option, r);       //delete redundancy of eq, c and r
 
 	std::cout << "Price List: " << std::endl;
 	for (std::size_t i=0; i<price_list.size(); i++)

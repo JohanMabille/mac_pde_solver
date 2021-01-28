@@ -36,13 +36,13 @@ namespace dauphine
 	virtual double get_price(std::vector<double> price_list) const = 0;
 
         
-        virtual std::vector<double> get_delta_curve(interface* opt) const = 0;
+    virtual std::vector<double> get_delta_curve(interface* opt) const = 0;
 
-        virtual double get_gamma(pde* pde,
-                              interface* opt,
-                              payoff* payoff,
-                              Space_boundaries* sb,
-                              Time_boundaries* tb) const = 0;
+//        virtual double get_gamma(pde* pde,
+//                              interface* opt,
+//                              payoff* payoff,
+//                              Space_boundaries* sb,
+//                              Time_boundaries* tb) const = 0;
 
 //        virtual double get_theta(pde* t_pde,
 //                         interface* opt,
@@ -80,11 +80,11 @@ namespace dauphine
         
         std::vector<double> get_delta_curve(interface* opt)const override;
         
-        double get_gamma(pde* t_pde,
-                         interface* opt,
-                         payoff* payoff,
-                         Space_boundaries* sb,
-                         Time_boundaries* tb) const override;
+//        double get_gamma(pde* t_pde,
+//                         interface* opt,
+//                         payoff* payoff,
+//                         Space_boundaries* sb,
+//                         Time_boundaries* tb) const override;
 
 //        double get_theta(pde* t_pde,
 //                         interface* opt,

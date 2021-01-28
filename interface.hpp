@@ -22,7 +22,7 @@ namespace dauphine
         
         double get_rate();
 //        double get_maturity();
-//        double get_spot();
+        double get_spot();
         payoff* get_payoff();
         
         void set_spot(double spot);
@@ -32,6 +32,8 @@ namespace dauphine
 	        
     protected:
         payoff* m_payoff;
+        double m_spot;
+        
       
 	};
 
