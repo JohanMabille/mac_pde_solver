@@ -25,7 +25,7 @@ namespace dauphine
 //        double get_spot();
         payoff* get_payoff();
         
-//        void set_spot(double spot);
+        void set_spot(double spot);
 //        void set_maturity(double t);
 //        void set_vol(volatility* sig);
 

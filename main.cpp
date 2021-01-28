@@ -48,12 +48,12 @@ namespace dauphine {
 	rate* r = new rate_cst(sb, tb);
        
         pde* eq = new bs_pde(vol, r);
-        fdm_interface* f = new fdm(eq, c);
+        fdm_interface* f = new fdm(eq, c);  //maybe we should add the sb and tb here rather than in price list
 
 	        
         std::cout << "Payoff: " << c->get_payoff(spot) << std::endl;
 
-	std::vector<double> price_list = f->get_price_list(eq, option, c, sb, tb, r);
+	std::vector<double> price_list = f->get_price_list(eq, option, c, sb, tb, r);       //delete redundancy of eq, c and r
 
 	std::cout << "Price List: " << std::endl;
 	for (std::size_t i=0; i<price_list.size(); i++)

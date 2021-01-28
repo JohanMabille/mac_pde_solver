@@ -23,11 +23,16 @@ namespace dauphine
          virtual ~volatility();
          virtual double get_sigma(double s, double t) const;
          virtual void vol_build() = 0;
+         Space_boundaries* get_sboundaries(); //check for const plz
+         Time_boundaries* get_tboundaries();
+         
          
      protected:
          std::vector<double> m_volatility;
          int nb_rows;
          int nb_cols;
+         Space_boundaries* s_boundaries;
+         Time_boundaries* t_boundaries;
      };
 
 

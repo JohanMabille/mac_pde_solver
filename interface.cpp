@@ -44,10 +44,10 @@ namespace dauphine
         return m_payoff;
     }
 
-//    void interface::set_spot(double spot)
-//    {
-//        this->m_spot = spot;
-//    }
+    void interface::set_spot(double spot)
+    {
+        this->m_spot = spot;
+    }
 //
 //    void interface::set_maturity(double t)
 //    {
