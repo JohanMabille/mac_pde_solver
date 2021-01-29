@@ -31,18 +31,15 @@ namespace dauphine
 		
         virtual std::vector<double> thomas(const std::vector<double> a, const std::vector<double> b, const std::vector<double> c,  std::vector<double> d) const = 0;
         
-	virtual std::vector<double> get_price_list(interface* opt, rate* r) const = 0;
+        virtual std::vector<double> get_price_list() const = 0;
 
-	virtual double get_price(std::vector<double> price_list) const = 0;
+        virtual double get_price(std::vector<double> price_list) const = 0;
 
         
-    virtual std::vector<double> get_delta_curve(interface* opt) const = 0;
+        virtual std::vector<double> get_delta_curve() const = 0;
+        virtual double get_delta() const = 0 ;
 
-//        virtual double get_gamma(pde* pde,
-//                              interface* opt,
-//                              payoff* payoff,
-//                              Space_boundaries* sb,
-//                              Time_boundaries* tb) const = 0;
+//        virtual std::vector<double> get_gamma_curve(interface* opt) const = 0;
 
 //        virtual double get_theta(pde* t_pde,
 //                         interface* opt,
@@ -73,19 +70,16 @@ namespace dauphine
                                    const std::vector<double> c,
                                    std::vector<double> d) const override;
 		
-		std::vector<double> get_price_list(interface* opt, rate* r) const override;
+		std::vector<double> get_price_list() const override;
 
 		double get_price(std::vector<double> price_list) const override;
         
         
-        std::vector<double> get_delta_curve(interface* opt)const override;
+        std::vector<double> get_delta_curve()const override;
+        double get_delta()const override;
         
-//        double get_gamma(pde* t_pde,
-//                         interface* opt,
-//                         payoff* payoff,
-//                         Space_boundaries* sb,
-//                         Time_boundaries* tb) const override;
-
+//        std::vector<double> get_gamma_curve(interface* opt) const override;
+        
 //        double get_theta(pde* t_pde,
 //                         interface* opt,
 //                         payoff* payoff,

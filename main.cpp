@@ -58,7 +58,7 @@ namespace dauphine {
         std::cout << "Payoff: " << c->get_payoff(spot) << std::endl;
         
 
-	std::vector<double> price_list = f->get_price_list(option, r);       //delete redundancy of eq, c and r
+	std::vector<double> price_list = f->get_price_list();       //delete redundancy of eq, c and r
 
 	std::cout << "Price List: " << std::endl;
 	for (std::size_t i=0; i<price_list.size(); i++)
@@ -72,7 +72,14 @@ namespace dauphine {
 	std::cout << "BS Price: " << bs_price(spot, user_strike, initial_sigma, maturity, true) << std::endl;
 
 
-//        std::cout << "Delta: " << f->get_delta(eq, option, c, sb, tb) << std::endl;
+        std::vector<double> delta_surface = f->get_delta_curve();
+        
+        std::cout << "Delta: " << std::endl;
+        for (std::size_t i=0; i<delta_surface.size(); i++)
+        {
+            std::cout << delta_surface[i] << std::endl;
+
+        }
 //        std::cout << "Gamma: " << f->get_gamma(eq, option, c, sb, tb) << std::endl;
 //        std::cout << "Theta: " << f->get_theta(eq, option, c, sb, tb) << std::endl;
 //        std::cout << "Vega: " << f->get_vega(eq, option, c, sb, tb) << std::endl;

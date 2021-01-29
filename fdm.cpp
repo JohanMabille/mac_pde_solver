@@ -71,19 +71,20 @@ namespace dauphine
 		m_payoff = nullptr;
 	}
 
-	std::vector<double> fdm::get_price_list(interface* opt, rate* r) const
+	std::vector<double> fdm::get_price_list() const
 	{
         pde* pde = fdm::m_pde;
         payoff* payoff = fdm::m_payoff;
+        rate* r = pde->get_rate();
         Space_boundaries* sb =pde->get_volatility()->get_sboundaries();
         Time_boundaries* tb=  pde->get_volatility()->get_tboundaries();
         double Smax = exp(sb->s_boundary_right()); // do the same as before, remove boudaries from parameters, they already exist within fdm
         double Smin = exp(sb->s_boundary_left());
         //double Smax = exp(sb->s_boundary_right());
         //double Smin = exp(sb->s_boundary_left());
-        double Tmax = tb->t_boundary_right(maturity);   //unused?
-        double Tmin = tb->t_boundary_left(maturity);
-        
+//        double Tmax = tb->t_boundary_right(maturity);   //unused?
+//        double Tmin = tb->t_boundary_left(maturity);
+//
 		//Calcul avec FDM
 		//1. On discretise le temps et l'espace
         std::size_t T = tb->time_mesh();
@@ -97,7 +98,7 @@ namespace dauphine
 	std::vector<double> F(N-1);
 	double S = Smin;
 	
-	for (std::size_t i = 0; i < F.size(); i++)
+	for (std::size_t i = 0; i < F.size(); i++)      //why strictly smaller?
         { 
 	
             F[i] = payoff->get_payoff(S);
@@ -187,7 +188,7 @@ namespace dauphine
 
 	double fdm::get_price(std::vector<double> price_list) const
 	{
-		double p = price_list[floor((price_list.size() )/2)];
+		double p = price_list[floor((price_list.size() )/2+1)];
 		return p;
 	
 	}
@@ -227,49 +228,58 @@ namespace dauphine
 
 
 
-    std::vector<double> fdm::get_delta_curve(interface* opt) const         //refactor interface; remove from parameter and add to fdm
+    std::vector<double> fdm::get_delta_curve() const
     {
-        double spot_plus = spot + 0.01; //maybe add spot as a attribute in fdm
-        double spot_minus = spot - 0.01;
+        //double spot_plus = spot + 0.01; //maybe add spot as a attribute in fdm (if we keep using the same definition)
+        //double spot_minus = spot - 1;
         volatility* vol = m_pde->get_volatility();
         rate* rate = m_pde->get_rate();
 
-        interface* opt_plus = new interface(*opt);
-        opt_plus->set_spot(spot_plus);    //We either define set_spot in interface or we do not use this line
-
-        interface* opt_minus = new interface(*opt);
-        opt_minus->set_spot(spot_minus);
-
-                                         
-        std::vector<double> p_plus_surface = get_price_list(opt_plus, rate);
-        std::vector<double> p_minus_surface = get_price_list(opt_minus, rate);
-
-        double p_plus = get_price(p_plus_surface);
-        double p_minus = get_price(p_minus_surface);
+//        interface* opt_plus = new interface(*opt);
+//        opt_plus->set_spot(spot_plus);    //We either define set_spot in interface or in payoff
+//
+//        interface* opt_minus = new interface(*opt);
+//        opt_minus->set_spot(spot_minus);
+//
+//
+//        std::vector<double> p_plus_surface = get_price_list(opt_plus, rate);
+//        std::vector<double> p_minus_surface = get_price_list(opt_minus, rate);
+        
+        std::vector<double> p_surface = get_price_list();
 
         
-        delete opt_plus;
-        delete opt_minus;
+//        delete opt_plus;
+//        delete opt_minus;
+        
 
         // Defined a transform function to calculate the difference between the prices (vectors) divided by 0.02
-        std::vector<double> result;
-        std::transform(p_plus_surface.begin(), p_plus_surface.end(), p_minus_surface.begin(), std::back_inserter(result), [&](double l, double r)
+        std::vector<double> result(p_surface.size()-1, 0);
+        std::transform(p_surface.begin(), p_surface.end()-1, p_surface.begin()+1, result.begin(), [&](double l, double r)
         {
-            return (l - r)/0.02;
+            return (r - l)/exp(dx);
         });
 
         return result;
     }
 
+    double fdm::get_delta() const
+{
+    std::vector<double> alpha_curve = get_delta_curve();
 
-//    double fdm::get_gamma(pde* t_pde,
-//                     interface* opt,
-//                     payoff* payoff,
-//                     Space_boundaries* sb,
-//                     Time_boundaries* tb) const
+    double delta = get_price(alpha_curve);
+
+
+    return delta;
+}
+
+
+//    std::vector<double> fdm::get_gamma_curve(interface* opt) const
 //    {
-//        double spot_plus = spot + 0.01;
+//        double spot_plus = spot + 0.01; //maybe add spot as a attribute in fdm
 //        double spot_minus = spot - 0.01;
+//        rate* rate = m_pde->get_rate();
+//
+//        opt->set_spot(spot);        //we probably do not need this line, just for clarity for the moment
 //
 //        interface* opt_plus = new interface(*opt);
 //        opt_plus->set_spot(spot_plus);
@@ -277,20 +287,42 @@ namespace dauphine
 //        interface* opt_minus = new interface(*opt);
 //        opt_minus->set_spot(spot_minus);
 //
-//        pde* pde_plus = new bs_pde(opt_plus);
-//        pde* pde_minus = new bs_pde(opt_minus);
+//        //pde* pde_plus = new bs_pde(opt_plus);
+//        //pde* pde_minus = new bs_pde(opt_minus);
 //
-//        double p = get_price(t_pde, opt, payoff, sb, tb);
-//        double p_plus = get_price(pde_plus, opt_plus, payoff, sb, tb);
-//        double p_minus = get_price(pde_minus, opt_minus, payoff, sb, tb);
+//        std::vector<double> p_surface = get_price_list();
+//        std::vector<double> p_plus_surface = get_price_list();
+//        std::vector<double> p_minus_surface = get_price_list();
 //
-//        delete pde_plus;
-//        delete pde_minus;
+//        //double p = get_price(t_pde, opt, payoff, sb, tb);
+//        //double p_plus = get_price(pde_plus, opt_plus, payoff, sb, tb);        IT IS LOGICAL THAT WE HAVE ONLY ONE PDE?
+//        //double p_minus = get_price(pde_minus, opt_minus, payoff, sb, tb);
+//
+//        //delete opt;????
 //        delete opt_plus;
 //        delete opt_minus;
 //
-//        return (p_plus - 2*p + p_minus)/(0.01*0.01);
+//
+//        std::vector<double> sum_p_plus_minus;
+//        std::transform(p_plus_surface.begin(), p_plus_surface.end(), p_minus_surface.begin(), std::back_inserter(sum_p_plus_minus), [&](double l, double r)
+//        {
+//            return (l + r);
+//        });
+//
+//        std::vector<double> result;
+//        std::transform(sum_p_plus_minus.begin(), sum_p_plus_minus.end(), p_surface.begin(), std::back_inserter(result), [&](double l, double r)
+//        {
+//            return (l - 2*r)/(0.01*0.01);       //To test
+//        });
+//
+//        return result;
+
+        //return (p_plus - 2*p + p_minus)/(0.01*0.01);
 //    }
+
+
+
+
 //
 //    double fdm::get_theta(pde* t_pde,
 //                          interface* opt,
