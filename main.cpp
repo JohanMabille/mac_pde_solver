@@ -80,6 +80,16 @@ namespace dauphine {
             std::cout << delta_surface[i] << std::endl;
 
         }
+        
+        std::vector<double> gamma_surface = f->get_gamma_curve();
+        
+        std::cout << "Gamma: " << std::endl;
+        for (std::size_t i=0; i<gamma_surface.size(); i++)
+        {
+            std::cout << gamma_surface[i] << std::endl;
+
+        }
+        
 //        std::cout << "Gamma: " << f->get_gamma(eq, option, c, sb, tb) << std::endl;
 //        std::cout << "Theta: " << f->get_theta(eq, option, c, sb, tb) << std::endl;
 //        std::cout << "Vega: " << f->get_vega(eq, option, c, sb, tb) << std::endl;

@@ -39,7 +39,8 @@ namespace dauphine
         virtual std::vector<double> get_delta_curve() const = 0;
         virtual double get_delta() const = 0 ;
 
-//        virtual std::vector<double> get_gamma_curve(interface* opt) const = 0;
+        virtual std::vector<double> get_gamma_curve() const = 0;
+        virtual double get_gamma() const = 0 ;
 
 //        virtual double get_theta(pde* t_pde,
 //                         interface* opt,
@@ -78,7 +79,8 @@ namespace dauphine
         std::vector<double> get_delta_curve()const override;
         double get_delta()const override;
         
-//        std::vector<double> get_gamma_curve(interface* opt) const override;
+        std::vector<double> get_gamma_curve() const override;
+        double get_gamma()const override;
         
 //        double get_theta(pde* t_pde,
 //                         interface* opt,
