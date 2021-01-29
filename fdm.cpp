@@ -230,29 +230,12 @@ namespace dauphine
 
     std::vector<double> fdm::get_delta_curve() const
     {
-        //double spot_plus = spot + 0.01; //maybe add spot as a attribute in fdm (if we keep using the same definition)
-        //double spot_minus = spot - 1;
-        volatility* vol = m_pde->get_volatility();
-        rate* rate = m_pde->get_rate();
-
-//        interface* opt_plus = new interface(*opt);
-//        opt_plus->set_spot(spot_plus);    //We either define set_spot in interface or in payoff
-//
-//        interface* opt_minus = new interface(*opt);
-//        opt_minus->set_spot(spot_minus);
-//
-//
-//        std::vector<double> p_plus_surface = get_price_list(opt_plus, rate);
-//        std::vector<double> p_minus_surface = get_price_list(opt_minus, rate);
+        
         
         std::vector<double> p_surface = get_price_list();
-
-        
-//        delete opt_plus;
-//        delete opt_minus;
         
 
-        // Defined a transform function to calculate the difference between the prices (vectors) divided by 0.02
+        // Defined a transform function to calculate the difference between the prices (vectors) divided by dx
         std::vector<double> result(p_surface.size()-1, 0);
         std::transform(p_surface.begin(), p_surface.end()-1, p_surface.begin()+1, result.begin(), [&](double l, double r)
         {
@@ -273,52 +256,40 @@ namespace dauphine
 }
 
 
-//    std::vector<double> fdm::get_gamma_curve(interface* opt) const
-//    {
-//        double spot_plus = spot + 0.01; //maybe add spot as a attribute in fdm
-//        double spot_minus = spot - 0.01;
-//        rate* rate = m_pde->get_rate();
-//
-//        opt->set_spot(spot);        //we probably do not need this line, just for clarity for the moment
-//
-//        interface* opt_plus = new interface(*opt);
-//        opt_plus->set_spot(spot_plus);
-//
-//        interface* opt_minus = new interface(*opt);
-//        opt_minus->set_spot(spot_minus);
-//
-//        //pde* pde_plus = new bs_pde(opt_plus);
-//        //pde* pde_minus = new bs_pde(opt_minus);
-//
-//        std::vector<double> p_surface = get_price_list();
-//        std::vector<double> p_plus_surface = get_price_list();
-//        std::vector<double> p_minus_surface = get_price_list();
-//
-//        //double p = get_price(t_pde, opt, payoff, sb, tb);
-//        //double p_plus = get_price(pde_plus, opt_plus, payoff, sb, tb);        IT IS LOGICAL THAT WE HAVE ONLY ONE PDE?
-//        //double p_minus = get_price(pde_minus, opt_minus, payoff, sb, tb);
-//
-//        //delete opt;????
-//        delete opt_plus;
-//        delete opt_minus;
-//
-//
-//        std::vector<double> sum_p_plus_minus;
-//        std::transform(p_plus_surface.begin(), p_plus_surface.end(), p_minus_surface.begin(), std::back_inserter(sum_p_plus_minus), [&](double l, double r)
-//        {
-//            return (l + r);
-//        });
-//
-//        std::vector<double> result;
-//        std::transform(sum_p_plus_minus.begin(), sum_p_plus_minus.end(), p_surface.begin(), std::back_inserter(result), [&](double l, double r)
-//        {
-//            return (l - 2*r)/(0.01*0.01);       //To test
-//        });
-//
-//        return result;
+    std::vector<double> fdm::get_gamma_curve() const
+    {
+        std::vector<double> p_surface = get_price_list();
+
+        
+
+        std::vector<double> sum_p_plus_minus(p_surface.size()-2, 0);
+        std::transform(p_surface.begin(), p_surface.end()-2, p_surface.begin()+2, sum_p_plus_minus.begin(), [&](double l, double r)
+        {
+            return l + r;
+        });
+
+        
+        std::vector<double> result(sum_p_plus_minus.size(), 0);
+        std::transform(p_surface.begin()+1, p_surface.end()-1, sum_p_plus_minus.begin(), result.begin(), [&](double l, double r)
+        {
+            return (r - 2*l)/(pow(exp(dx), 2));       //To test
+        });
+
+        return result;
 
         //return (p_plus - 2*p + p_minus)/(0.01*0.01);
-//    }
+    }
+
+
+       double fdm::get_gamma() const
+    {
+        std::vector<double> gamma_curve = get_gamma_curve();
+
+        double gamma = get_price(gamma_curve);
+
+
+        return gamma;
+    }
 
 
 
