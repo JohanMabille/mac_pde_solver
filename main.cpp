@@ -38,7 +38,11 @@ namespace dauphine {
     {
         Space_boundaries* sb = new Sboundaries();
         Time_boundaries* tb = new Tboundaries();
-        payoff* c = new call(strike);
+        
+        std::cout << "Please enter your strike " << std::endl;
+        double user_strike = 0;
+        std::cin >> user_strike;
+        payoff* c = new call(user_strike);
 
 	interface* option = new interface(c); 
         
@@ -65,7 +69,7 @@ namespace dauphine {
 
 	std::cout << "Price at the input Spot: " << f->get_price(price_list) << std::endl;
         
-	std::cout << "BS Price: " << bs_price(spot, strike, initial_sigma, maturity, true) << std::endl;
+	std::cout << "BS Price: " << bs_price(spot, user_strike, initial_sigma, maturity, true) << std::endl;
 
 
 //        std::cout << "Delta: " << f->get_delta(eq, option, c, sb, tb) << std::endl;
