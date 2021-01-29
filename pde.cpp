@@ -19,6 +19,7 @@ namespace dauphine
         std::cout<<"BS PDE constructor"<<std::endl;
     }
 
+
     bs_pde::~bs_pde()
     {
         m_vol = nullptr;
@@ -53,6 +54,13 @@ namespace dauphine
     double bs_pde::source_coeff() const
     {
         return 0.;
+    }
+    
+    volatility* bs_pde::get_volatility() const{
+        return m_vol;
+    }
+    rate* bs_pde::get_rate() const{
+        return m_rate;
     }
 
 }

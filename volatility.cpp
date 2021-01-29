@@ -6,11 +6,21 @@ namespace dauphine
 	volatility::volatility(Space_boundaries* sb,
                            Time_boundaries* tb)
     : m_volatility(sb->space_mesh()*tb->time_mesh())
+    ,s_boundaries(sb)
+    ,t_boundaries(tb)
     , nb_cols(tb->time_mesh())
     , nb_rows(sb->space_mesh())
     {
 		std::cout << "constructeur vol" << std::endl;
 	}
+
+    Space_boundaries* volatility::get_sboundaries(){
+        return s_boundaries;
+    }
+
+    Time_boundaries* volatility::get_tboundaries(){
+        return t_boundaries;
+    }
 	
 	volatility::~volatility()
 	{
