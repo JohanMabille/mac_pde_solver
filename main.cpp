@@ -1,4 +1,3 @@
-#include "interface.hpp"
 #include "closed_form.hpp"
 #include "payoff.hpp"
 #include "pde.hpp"
@@ -33,77 +32,90 @@
 
 namespace dauphine {
 
-
     void test()
     {
+        std::cout << "Please enter the strike: " << std::endl;
+        double user_strike = 0;
+        std::cin >> user_strike;
+
+        
         Space_boundaries* sb = new Sboundaries();
         Time_boundaries* tb = new Tboundaries();
         
-        std::cout << "Please enter your strike " << std::endl;
-        double user_strike = 0;
-        std::cin >> user_strike;
         payoff* c = new call(user_strike);
-
-	interface* option = new interface(c); 
         
-        volatility* vol = new vol_cst(sb, tb);
-	 
-
-	rate* r = new rate_cst(sb, tb);
+        volatility* vol = new vol_cst(sb, tb, spot, maturity, initial_sigma);
+        rate* r = new rate_cst(sb, tb, spot, maturity);
        
         pde* eq = new bs_pde(vol, r);
-        fdm_interface* f = new fdm(eq, c);  //maybe we should add the sb and tb here rather than in price list
+        fdm_interface* f = new fdm(eq, c);
 
 	        
         std::cout << "Payoff: " << c->get_payoff(spot) << std::endl;
         
+        std::vector<double> price_list = f->get_price_list(spot, maturity);
 
-	std::vector<double> price_list = f->get_price_list();       //delete redundancy of eq, c and r
+        std::cout << "Price List: " << std::endl;
+        for (std::size_t i = 0; i < price_list.size(); i++)
+        {
+            std::cout << price_list[i] << std::endl;
+        }
 
-	std::cout << "Price List: " << std::endl;
-	for (std::size_t i=0; i<price_list.size(); i++)
-	{
-		std::cout << price_list[i] << std::endl;
-
-	}
-
-	std::cout << "Price at the input Spot: " << f->get_price(price_list) << std::endl;
+        std::cout << "Price at the input Spot: " << f->get_price(price_list) << std::endl;
         
-	std::cout << "BS Price: " << bs_price(spot, user_strike, initial_sigma, maturity, true) << std::endl;
+        std::cout << "BS Price: " << bs_price(spot, user_strike, initial_sigma, maturity, true) << std::endl;
 
 
-        std::vector<double> delta_surface = f->get_delta_curve();
+        std::vector<double> delta_surface = f->get_delta_curve(spot, maturity);
         
         std::cout << "Delta: " << std::endl;
         for (std::size_t i=0; i<delta_surface.size(); i++)
         {
             std::cout << delta_surface[i] << std::endl;
-
         }
+        std::cout << "Delta spot: " << f->get_delta() << std::endl;
+    
         
-        std::vector<double> gamma_surface = f->get_gamma_curve();
+        std::vector<double> gamma_surface = f->get_gamma_curve(spot, maturity);
         
         std::cout << "Gamma: " << std::endl;
         for (std::size_t i=0; i<gamma_surface.size(); i++)
         {
             std::cout << gamma_surface[i] << std::endl;
-
         }
+        std::cout << "Gamma spot: " << f->get_gamma() << std::endl;
         
-//        std::cout << "Gamma: " << f->get_gamma(eq, option, c, sb, tb) << std::endl;
-//        std::cout << "Theta: " << f->get_theta(eq, option, c, sb, tb) << std::endl;
-//        std::cout << "Vega: " << f->get_vega(eq, option, c, sb, tb) << std::endl;
+        
+        std::vector<double> theta_surface = f->get_theta_curve(spot, maturity);
+        
+        std::cout << "Theta: " << std::endl;
+        for (std::size_t i=0; i<theta_surface.size(); i++)
+        {
+            std::cout << theta_surface[i] << std::endl;
+        }
+        std::cout << "Theta spot: " << f->get_theta() << std::endl;
+        
+        
+        
+        std::vector<double> vega_surface = f->get_vega_curve();
+        
+        std::cout << "Vega: " << std::endl;
+        for (std::size_t i=0; i<vega_surface.size(); i++)
+        {
+            std::cout << vega_surface[i] << std::endl;
+        }
+        std::cout << "Vega spot: " << f->get_vega() << std::endl;
+        
 
         
         delete f;
         delete eq;
-        delete option;
+        delete r;
+        delete vol;
         delete c;
         delete tb;
         delete sb;
-	delete r; 
-	delete vol;
-
+	
     }
 }
 
