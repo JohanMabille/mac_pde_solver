@@ -2,18 +2,16 @@
 
 namespace dauphine{
 
-	rate::rate(Space_boundaries* sb,Time_boundaries* tb)
-    		: m_rate(sb->space_mesh()*tb->time_mesh())
-    		, nb_cols(tb->time_mesh())
-    		, nb_rows(sb->space_mesh())
+	rate::rate(Space_boundaries* sb,Time_boundaries* tb, double i_spot, double i_maturity)
+    		: m_rate(sb->space_mesh(i_spot, i_maturity)*tb->time_mesh(i_maturity))
+    		, nb_cols(tb->time_mesh(i_maturity))
+    		, nb_rows(sb->space_mesh(i_spot, i_maturity))
 
 	{
-		std::cout << "constructeur rate" << std::endl;
 	}
 
 	rate::~rate()
 	{
-		std::cout << "destructeur rate" << std::endl;
 	}
 
 	double rate::get_rate(double s, double t) const
@@ -22,16 +20,16 @@ namespace dauphine{
    	}
 
 	rate_cst::rate_cst(Space_boundaries* sb,
-                     Time_boundaries* tb)
-    	: rate(sb, tb)
+                       Time_boundaries* tb,
+                       double i_spot,
+                       double i_maturity)
+    	: rate(sb, tb, i_spot, i_maturity)
     	{
         	rate_build();
-        	std::cout << "constructeur rate cst" << std::endl;
     	}
 
     	rate_cst::~rate_cst()
     	{
-        	std::cout << "destructeur rate cst" << std::endl;
     	}
 
     	void rate_cst::rate_build()

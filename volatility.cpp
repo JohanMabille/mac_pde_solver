@@ -4,14 +4,15 @@ namespace dauphine
 {
 	
 	volatility::volatility(Space_boundaries* sb,
-                           Time_boundaries* tb)
-    : m_volatility(sb->space_mesh()*tb->time_mesh())
-    ,s_boundaries(sb)
-    ,t_boundaries(tb)
-    , nb_cols(tb->time_mesh())
-    , nb_rows(sb->space_mesh())
+                           Time_boundaries* tb,
+                           double i_spot,
+                           double i_maturity)
+    : m_volatility(sb->space_mesh(i_spot, i_maturity)*tb->time_mesh(i_maturity))
+    , s_boundaries(sb)
+    , t_boundaries(tb)
+    , nb_cols(tb->time_mesh(i_maturity))
+    , nb_rows(sb->space_mesh(i_spot, i_maturity))
     {
-		std::cout << "constructeur vol" << std::endl;
 	}
 
     Space_boundaries* volatility::get_sboundaries(){
@@ -25,7 +26,6 @@ namespace dauphine
 	volatility::~volatility()
 	{
         m_volatility.clear();
-        std::cout << "destructeur vol" << std::endl;
 	}
 
     double volatility::get_sigma(double s, double t) const
@@ -34,25 +34,26 @@ namespace dauphine
     }
 
 	vol_cst::vol_cst(Space_boundaries* sb,
-                     Time_boundaries* tb)
-    : volatility(sb, tb)
+                     Time_boundaries* tb,
+                     double i_spot,
+                     double i_maturity,
+                     double i_sigma)
+    : volatility(sb, tb, i_spot, i_maturity)
     {
-        vol_build();
-        std::cout << "constructeur vol cst" << std::endl;
+        vol_build(i_sigma);
     }
 
     vol_cst::~vol_cst()
     {
-        std::cout << "destructeur vol cst" << std::endl;
     }
 
-    void vol_cst::vol_build()
+    void vol_cst::vol_build(double i_sigma)
     {
         for (int i = 0; i < nb_rows; ++i)
         {
             for (int j = 0; j < nb_cols; ++j)
             {
-                m_volatility[i*nb_rows + j] = initial_sigma;
+                m_volatility[i*nb_rows + j] = i_sigma;
 		
             }
         }
