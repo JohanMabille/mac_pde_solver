@@ -31,23 +31,25 @@ namespace dauphine
 		
         virtual std::vector<double> thomas(const std::vector<double> a, const std::vector<double> b, const std::vector<double> c,  std::vector<double> d) const = 0;
         
-        virtual std::vector<double> get_price_list() const = 0;
+        virtual std::vector<std::vector<double>> get_price_list(double volatility_eps=0) const = 0;
 
         virtual double get_price(std::vector<double> price_list) const = 0;
 
         
+        virtual std::vector<std::vector<double>> get_delta_surface() const  =0;
         virtual std::vector<double> get_delta_curve() const = 0;
         virtual double get_delta() const = 0 ;
-
+        
+        virtual std::vector<std::vector<double>> get_gamma_surface() const = 0;
         virtual std::vector<double> get_gamma_curve() const = 0;
         virtual double get_gamma() const = 0 ;
+        
+        std::vector<std::vector<double>> transpose(std::vector<std::vector<double>> b) const;
 
-//        virtual double get_theta(pde* t_pde,
-//                         interface* opt,
-//                         payoff* payoff,
-//                         Space_boundaries* sb,
-//                         Time_boundaries* tb) const = 0;
-//
+        virtual std::vector<std::vector<double>> get_theta_surface() const = 0;
+        virtual std::vector<double> get_theta_curve() const = 0;
+        
+        virtual std::vector<double> get_vega_curve() const =0;
 //        virtual double get_vega(pde* t_pde,
 //                         interface* opt,
 //                         payoff* payoff,
@@ -71,17 +73,22 @@ namespace dauphine
                                    const std::vector<double> c,
                                    std::vector<double> d) const override;
 		
-		std::vector<double> get_price_list() const override;
+		std::vector<std::vector<double>> get_price_list(double volatility_eps=0) const override; //optional parameter
 
 		double get_price(std::vector<double> price_list) const override;
         
         
+        std::vector<std::vector<double>> get_delta_surface() const override;
         std::vector<double> get_delta_curve()const override;
         double get_delta()const override;
         
+        std::vector<std::vector<double>> get_gamma_surface() const override;
         std::vector<double> get_gamma_curve() const override;
         double get_gamma()const override;
         
+        std::vector<std::vector<double>> get_theta_surface() const override;
+        std::vector<double> get_theta_curve() const override;
+        std::vector<double> get_vega_curve() const override;
 //        double get_theta(pde* t_pde,
 //                         interface* opt,
 //                         payoff* payoff,

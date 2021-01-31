@@ -22,7 +22,7 @@ namespace dauphine
                              Time_boundaries* tb);
          virtual ~volatility();
          virtual double get_sigma(double s, double t) const;
-         virtual void vol_build() = 0;
+         virtual void vol_build(double eps=0) = 0;  //allows the user to define the incremental change of the volatility as needed for the vega calculation
          Space_boundaries* get_sboundaries(); //check for const plz
          Time_boundaries* get_tboundaries();
          
@@ -42,7 +42,7 @@ namespace dauphine
          vol_cst(Space_boundaries* sb,
                  Time_boundaries* tb);
          ~vol_cst();
-         void vol_build() override;
+         void vol_build(double eps=0) override;
      };
 }
 

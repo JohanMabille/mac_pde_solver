@@ -58,16 +58,15 @@ namespace dauphine {
         std::cout << "Payoff: " << c->get_payoff(spot) << std::endl;
         
 
-	std::vector<double> price_list = f->get_price_list();       //delete redundancy of eq, c and r
-
-	std::cout << "Price List: " << std::endl;
-	for (std::size_t i=0; i<price_list.size(); i++)
+	std::vector<std::vector<double>> price_list = f->get_price_list();       //delete redundancy of eq, c and r
+    std::cout << "Price List: " << std::endl;
+        for (std::size_t i=0; i<price_list[price_list.size()-1].size(); i++)
 	{
-		std::cout << price_list[i] << std::endl;
+        std::cout << price_list[price_list.size()-1][i] << std::endl;
 
 	}
 
-	std::cout << "Price at the input Spot: " << f->get_price(price_list) << std::endl;
+	std::cout << "Price at the input Spot: " << f->get_price(price_list[price_list.size()-1]) << std::endl;
         
 	std::cout << "BS Price: " << bs_price(spot, user_strike, initial_sigma, maturity, true) << std::endl;
 
@@ -81,12 +80,28 @@ namespace dauphine {
 
         }
         
-        std::vector<double> gamma_surface = f->get_gamma_curve();
+        std::vector<double> gamma_curve = f->get_gamma_curve();
         
         std::cout << "Gamma: " << std::endl;
-        for (std::size_t i=0; i<gamma_surface.size(); i++)
+        for (std::size_t i=0; i<gamma_curve.size(); i++)
         {
-            std::cout << gamma_surface[i] << std::endl;
+            std::cout << gamma_curve[i] << std::endl;
+
+        }
+        
+        std::vector<double> theta_surface = f->get_theta_curve();
+        std::cout << "Theta: " << std::endl;
+        for (std::size_t i=0; i<theta_surface.size(); i++)
+        {
+            std::cout << theta_surface[i] << std::endl;
+
+        }
+        
+        std::vector<double> vega_curve = f->get_vega_curve();
+        std::cout << "Vega: " << std::endl;
+        for (std::size_t i=0; i<vega_curve.size(); i++)
+        {
+            std::cout << vega_curve[i] << std::endl;
 
         }
         
@@ -101,8 +116,8 @@ namespace dauphine {
         delete c;
         delete tb;
         delete sb;
-	delete r; 
-	delete vol;
+        delete r; 
+        delete vol;
 
     }
 }

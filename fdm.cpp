@@ -71,11 +71,12 @@ namespace dauphine
 		m_payoff = nullptr;
 	}
 
-	std::vector<double> fdm::get_price_list() const
+    std::vector<std::vector<double>> fdm::get_price_list(double volatility_eps) const
 	{
         pde* pde = fdm::m_pde;
         payoff* payoff = fdm::m_payoff;
         rate* r = pde->get_rate();
+        pde->get_volatility()->vol_build(volatility_eps); // recalculating the volatility matrix due to the fact that we might have a change in volatility_eps
         Space_boundaries* sb =pde->get_volatility()->get_sboundaries();
         Time_boundaries* tb=  pde->get_volatility()->get_tboundaries();
         double Smax = exp(sb->s_boundary_right()); // do the same as before, remove boudaries from parameters, they already exist within fdm
@@ -100,7 +101,7 @@ namespace dauphine
 	
 	for (std::size_t i = 0; i < F.size(); i++)      //why strictly smaller?
         { 
-	
+            //maybe store the spots?
             F[i] = payoff->get_payoff(S);
 	    S = S * exp(dx);
   	}
@@ -149,13 +150,13 @@ namespace dauphine
 
 		//On remonte via l'algorithme de Thomas
 		S = Smax;
-
+        std::vector<std::vector<double>> return_F;
 		for (int t = T-1; t>=0 ; t--)
 		{
 			//Pour chaque x(i,t+1), en commencant par f_N, on remonte à x(i,t)
 			//via l'algo de Thomas et le système trouvé
 			
-			//On calcule la matrice tridiagoname en t en tt pt de l'espace
+			//On calcule la matrice tridiagonale en t en tt pt de l'espace
 			for (std::size_t i = 0; i < N-1; i++)
 			{
 				A1[i] = a1(pde, S, t);
@@ -171,7 +172,7 @@ namespace dauphine
 
 			//On calcule la matrice F en t, et on fait Ft1=Ft
       			F = thomas(B1, B2, B3, D);
-            
+            return_F.push_back(F);
 			//On recalcule la nouvelle matrice D
 			D[0] = A2[0]*F[0] + A3[0]*F[1] + C[0];
 			D[N-2] = A1[N-2]*F[N-2] + A2[N-2]*F[N-2] + C[N-2];
@@ -180,9 +181,10 @@ namespace dauphine
 			{
 				D[i] = A1[i]*F[i-1] + A2[i]*F[i] + A3[i]*F[i+1];
 			}
+            //add F's
 		}
 
-		return F;
+		return return_F;
         
 	}
 
@@ -227,57 +229,57 @@ namespace dauphine
 	}
 
 
-
-    std::vector<double> fdm::get_delta_curve() const
+    std::vector<std::vector<double>> fdm::get_delta_surface() const
     {
         
         
-        std::vector<double> p_surface = get_price_list();
-        
+        std::vector<std::vector<double>> p_surface = get_price_list();
 
         // Defined a transform function to calculate the difference between the prices (vectors) divided by dx
-        std::vector<double> result(p_surface.size()-1, 0);
-        std::transform(p_surface.begin(), p_surface.end()-1, p_surface.begin()+1, result.begin(), [&](double l, double r)
-        {
-            return (r - l)/exp(dx);
-        });
-
-        return result;
+        std::vector<std::vector<double>> delta_surface;
+        for(int i=0; i < p_surface.size(); i++){ // iterating over the time axis of the price surface
+            std::vector<double> p_curve = p_surface[i];
+            std::vector<double> d_curve(p_curve.size()-1, 0);
+            std::transform(p_curve.begin(), p_curve.end()-1, p_curve.begin()+1, d_curve.begin(), [&](double l, double r)
+            {
+                return (r - l)/exp(dx);
+            });
+            delta_surface.push_back(d_curve);
+        }
+        return delta_surface;
+    }
+    std::vector<double> fdm::get_delta_curve() const // TODO enable the selection of a specific time period, currently always last time step
+    {
+        return fdm::get_delta_surface().back(); //get the last one with pop_back
     }
 
     double fdm::get_delta() const
 {
-    std::vector<double> alpha_curve = get_delta_curve();
+    std::vector<double> delta_curve = get_delta_curve();
 
-    double delta = get_price(alpha_curve);
+    double delta = get_price(delta_curve);
 
 
     return delta;
 }
 
-
+std::vector<std::vector<double>> fdm::get_gamma_surface() const{
+    std::vector<std::vector<double>> delta_surface = get_delta_surface();
+    std::vector<std::vector<double>> gamma_surface;
+    for(int t=0; t<delta_surface.size(); t++){
+        std::vector<double> delta_curve = delta_surface[t];
+        std::vector<double> gamma_curve(delta_curve.size()-1, 0);
+        std::transform(delta_curve.begin(), delta_curve.end()-1, delta_curve.begin()+1, gamma_curve.begin(), [&](double l, double r)
+        {
+            return (r - l)/exp(dx);       //To test
+        });
+        gamma_surface.push_back(gamma_curve);
+    }
+    return gamma_surface;
+}
     std::vector<double> fdm::get_gamma_curve() const
     {
-        std::vector<double> p_surface = get_price_list();
-
-        
-
-        std::vector<double> sum_p_plus_minus(p_surface.size()-2, 0);
-        std::transform(p_surface.begin(), p_surface.end()-2, p_surface.begin()+2, sum_p_plus_minus.begin(), [&](double l, double r)
-        {
-            return l + r;
-        });
-
-        
-        std::vector<double> result(sum_p_plus_minus.size(), 0);
-        std::transform(p_surface.begin()+1, p_surface.end()-1, sum_p_plus_minus.begin(), result.begin(), [&](double l, double r)
-        {
-            return (r - 2*l)/(pow(exp(dx), 2));       //To test
-        });
-
-        return result;
-
-        //return (p_plus - 2*p + p_minus)/(0.01*0.01);
+        return fdm::get_gamma_surface().back();
     }
 
 
@@ -291,8 +293,65 @@ namespace dauphine
         return gamma;
     }
 
+std::vector<std::vector<double> > fdm_interface::transpose(std::vector<std::vector<double>> b) const
+{
+    if (b.size() == 0)
+        return std::vector<std::vector<double> >();
 
+    std::vector<std::vector<double> > trans_vec(b[0].size(), std::vector<double>());
 
+    for (int i = 0; i < b.size(); i++)
+    {
+        for (int j = 0; j < b[i].size(); j++)
+        {
+            trans_vec[j].push_back(b[i][j]);
+        }
+    }
+
+    return trans_vec;    // <--- reassign here
+}
+
+std::vector<std::vector<double>> fdm::get_theta_surface() const
+{
+    
+    std::vector<std::vector<double>> p_surface = get_price_list();
+    p_surface = fdm_interface::transpose(p_surface);
+    // Defined a transform function to calculate the difference between the prices (vectors) divided by dx
+    std::vector<std::vector<double>> theta_surface;
+    for(int i=0; i < p_surface.size(); i++){ // iterating over the space axis of the price surface
+        std::vector<double> p_curve = p_surface[i];
+        std::vector<double> t_curve(p_curve.size()-1, 0);
+        std::transform(p_curve.begin(), p_curve.end()-1, p_curve.begin()+1, t_curve.begin(), [&](double l, double r)
+        {
+            return (r - l)/exp(dx);
+        });
+        theta_surface.push_back(t_curve);
+    }
+    return theta_surface;
+}
+std::vector<double> fdm::get_theta_curve() const // TODO enable the selection of a specific time period, currently always last time step
+{
+    return fdm::get_theta_surface().back(); //get the last one with pop_back
+}
+
+std::vector<double> fdm::get_vega_curve() const
+{
+    std::vector<double> prices;
+    std::vector<double> vol;
+    for (int eps = -20; eps<20; eps++){
+        std::vector<std::vector<double>> p_surface = get_price_list(eps);
+        int t = p_surface.size()-1;
+        int s = floor((p_surface[t].size() )/2+1);
+        prices.push_back(p_surface[t][s]);
+        vol.push_back(fdm::m_pde->get_volatility()->get_sigma(s, t));
+    }
+    std::vector<double> vega_curve;
+    for(int i =  0; i<prices.size()-1;i++){
+        vega_curve.push_back((prices[i]-prices[i+1])/(vol[i]-vol[i+1]));
+    }
+    
+    return vega_curve;
+}
 
 //
 //    double fdm::get_theta(pde* t_pde,

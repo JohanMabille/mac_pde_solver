@@ -46,13 +46,13 @@ namespace dauphine
         std::cout << "destructeur vol cst" << std::endl;
     }
 
-    void vol_cst::vol_build()
+    void vol_cst::vol_build(double eps)
     {
         for (int i = 0; i < nb_rows; ++i)
         {
             for (int j = 0; j < nb_cols; ++j)
             {
-                m_volatility[i*nb_rows + j] = initial_sigma;
+                m_volatility[i*nb_rows + j] = initial_sigma*(1-eps/100);
 		
             }
         }
