@@ -32,40 +32,27 @@
 
 namespace dauphine {
 
-
     void test()
     {
-        static double initial_sigma = 0.20;
-        static double initial_rate = 0.02;
-        static double spot = 100.;
-        static double maturity = 0.25;
-        static double f0 = 1.;
-        static double fN = 250.;
-        static double dt = 0.01;
-        static double dx = 0.01;
-        static double theta = 0.5;
+        std::cout << "Please enter the strike: " << std::endl;
+        double user_strike = 0;
+        std::cin >> user_strike;
         
         Space_boundaries* sb = new Sboundaries();
         Time_boundaries* tb = new Tboundaries();
         
-        std::cout << "Please enter your strike " << std::endl;
-        double user_strike = 0;
-        std::cin >> user_strike;
         payoff* c = new call(user_strike);
 
-        
-      
-        
         volatility* vol = new vol_cst(sb, tb);
         rate* r = new rate_cst(sb, tb);
        
         pde* eq = new bs_pde(vol, r);
         fdm_interface* f = new fdm(eq, c);
-        
-        
+  
 	        
         std::cout << "Payoff: " << c->get_payoff(spot) << std::endl;
         
+        std::vector<double> price_list = f->get_price_list(spot, maturity);
 
     //	std::vector<std::vector<double>> price_list = f->get_price_list();       //delete redundancy of eq, c and r
     //    std::cout << "Price List: " << std::endl;
@@ -128,10 +115,6 @@ namespace dauphine {
         
         std::cout << "Vega Spot: " << f->get_price(vega_curve) << std::endl;
         
-//        std::cout << "Gamma: " << f->get_gamma(eq, option, c, sb, tb) << std::endl;
-//        std::cout << "Theta: " << f->get_theta(eq, option, c, sb, tb) << std::endl;
-//        std::cout << "Vega: " << f->get_vega(eq, option, c, sb, tb) << std::endl;
-//
         
         delete f;
         delete eq;

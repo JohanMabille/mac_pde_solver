@@ -19,12 +19,15 @@ namespace dauphine
      {
      public:
          explicit volatility(Space_boundaries* sb,
-                             Time_boundaries* tb);
+                             Time_boundaries* tb,
+                             double i_spot,
+                             double i_maturity);
          virtual ~volatility();
          virtual double get_sigma(double s, double t) const;
          virtual double get_sigma_by_index(int row, int column) const;
          virtual void vol_build(double eps=0) = 0;  //allows the user to define the incremental change of the volatility as needed for the vega calculation
          Space_boundaries* get_sboundaries(); //check for const plz
+
          Time_boundaries* get_tboundaries();
          
          
@@ -41,9 +44,13 @@ namespace dauphine
      {
      public:
          vol_cst(Space_boundaries* sb,
-                 Time_boundaries* tb);
+                 Time_boundaries* tb,
+                 double i_spot,
+                 double i_maturity,
+                 double i_sigma);
          ~vol_cst();
          void vol_build(double eps=0) override;
+
      };
 }
 

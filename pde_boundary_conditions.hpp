@@ -15,20 +15,20 @@ namespace dauphine
 	class Space_boundaries
     	{
    	public:
-		//Constructeurs/Destructeurs?
+
 		
-    		virtual double s_boundary_left() const = 0;
-        	virtual double s_boundary_right() const = 0;
-            virtual double space_mesh() const = 0;
+    		virtual double s_boundary_left(double i_spot, double i_maturity) const = 0;
+        	virtual double s_boundary_right(double i_spot, double i_maturity) const = 0;
+            virtual double space_mesh(double i_spot, double i_maturity) const = 0;
             
     	};
 
 	class Sboundaries: public Space_boundaries
 	{
     	public:
-        	double s_boundary_left() const override;
-            double s_boundary_right() const override;
-            double space_mesh() const override;
+        	double s_boundary_left(double i_spot, double i_maturity) const override;
+            double s_boundary_right(double i_spot, double i_maturity) const override;
+            double space_mesh(double i_spot, double i_maturity) const override;
     	};
 
 	class Time_boundaries
@@ -36,7 +36,7 @@ namespace dauphine
        	public:
            	virtual double t_boundary_left(double t) const = 0;
         	virtual double t_boundary_right(double t) const = 0;
-            virtual double time_mesh() const = 0;
+            virtual double time_mesh(double i_maturity) const = 0;
    	};
 
 
@@ -45,7 +45,7 @@ namespace dauphine
        	public:
            	double t_boundary_left(double t) const override;
            	double t_boundary_right(double t) const override;
-            double time_mesh() const override;
+            double time_mesh(double i_maturity) const override;
    	};
 
 }

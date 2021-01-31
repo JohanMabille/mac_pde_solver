@@ -10,9 +10,8 @@ namespace dauphine
 
 	fdm_interface::~fdm_interface()
 	{
-		delete m_pde; //destruction du pointeur
+		delete m_pde;
 		delete m_payoff;
-
 	}
 
 	double fdm_interface::a1(pde* pde, double s, double t) const
@@ -76,36 +75,37 @@ namespace dauphine
         pde* pde = fdm::m_pde;
         payoff* payoff = fdm::m_payoff;
         rate* r = pde->get_rate();
+      
         pde->get_volatility()->vol_build(volatility_eps); // recalculating the volatility matrix due to the fact that we might have a change in volatility_eps
         Space_boundaries* sb =pde->get_volatility()->get_sboundaries();
         Time_boundaries* tb=  pde->get_volatility()->get_tboundaries();
         double Smax = exp(sb->s_boundary_right()); // do the same as before, remove boudaries from parameters, they already exist within fdm
         double Smin = exp(sb->s_boundary_left());
         
-        
+
 		//Calcul avec FDM
 		//1. On discretise le temps et l'espace
-        std::size_t T = tb->time_mesh();
-        std::size_t N = sb->space_mesh();
-	double r0 = initial_rate;
+        std::size_t T = tb->time_mesh(i_maturity);
+        std::size_t N = sb->space_mesh(i_spot, i_maturity);
+        double r0 = initial_rate;
 
 		//2. Calcul des f intermédiaires
 			
 		//Calcul de la matrice F en T
         
-	std::vector<double> F(N-1);
-	double S = Smin;
+        std::vector<double> F(N-1);
+        double S = Smin;
 	
-	for (std::size_t i = 0; i < F.size(); i++)      //why strictly smaller?
+        for (std::size_t i = 0; i < F.size(); i++)      //why strictly smaller?
         { 
             //maybe store the spots?
             F[i] = payoff->get_payoff(S);
-	    S = S * exp(dx);
-  	}
+            S = S * exp(dx);
+        }
         
         	
 		//Calcul des coeffs des matrices tridiagonales en T
-		double mat = maturity;
+		double mat = i_maturity;
 		//def matrice des coeffs pour avoir les coeffs en tt pt de l espace
 		std::vector<double> A1(N-1, 0.0);
 		std::vector<double> A2(N-1, 0.0);
@@ -187,7 +187,7 @@ namespace dauphine
 
 	double fdm::get_price(std::vector<double> price_list) const
 	{
-		double p = price_list[floor((price_list.size() )/2+1)];
+		double p = price_list[floor((price_list.size()/2) + 1)];
 		return p;
 	
 	}
@@ -257,8 +257,10 @@ namespace dauphine
     double delta = get_price(delta_curve);
 
 
-    return delta;
-}
+        double delta = get_price(alpha_curve);
+
+        return delta;
+    }
 
 std::vector<std::vector<double>> fdm::get_gamma_surface() const{
     std::vector<std::vector<double>> delta_surface = get_delta_surface();
@@ -277,15 +279,15 @@ std::vector<std::vector<double>> fdm::get_gamma_surface() const{
     std::vector<double> fdm::get_gamma_curve() const
     {
         return fdm::get_gamma_surface().back();
+
     }
 
 
        double fdm::get_gamma() const
     {
-        std::vector<double> gamma_curve = get_gamma_curve();
+        std::vector<double> gamma_curve = get_gamma_curve(spot, maturity);
 
         double gamma = get_price(gamma_curve);
-
 
         return gamma;
     }
@@ -296,6 +298,7 @@ std::vector<std::vector<double> > fdm_interface::transpose(std::vector<std::vect
         return std::vector<std::vector<double> >();
 
     std::vector<std::vector<double> > trans_vec(b[0].size(), std::vector<double>());
+
 
     for (int i = 0; i < b.size(); i++)
     {
@@ -413,6 +416,5 @@ std::vector<double> fdm::get_vega_curve() const
 //
 //        return (p_plus - p_minus)/0.02;
 //    }
-
 
 }
