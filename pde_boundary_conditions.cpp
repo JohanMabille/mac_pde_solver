@@ -4,22 +4,22 @@
 namespace dauphine
 {
 
-	double Sboundaries::s_boundary_left(double i_spot, double i_maturity) const
+	double Sboundaries::s_boundary_left() const
 	{
-    		double lower_boundary = log(i_spot) - 5*initial_sigma*sqrt(i_maturity);
-    		return lower_boundary;
+    		double lower_boundary = log(spot) - 5*initial_sigma*sqrt(maturity);
+    		return lower_boundary; //on a x=log(s)
 	}
 
-	double Sboundaries::s_boundary_right(double i_spot, double i_maturity) const
+	double Sboundaries::s_boundary_right() const
 	{
-    		double upper_boundary = log(i_spot) + 5*initial_sigma*sqrt(i_maturity);
+    		double upper_boundary = log(spot) + 5*initial_sigma*sqrt(maturity);
     		return upper_boundary;
 	}
 		
-	double Sboundaries::space_mesh(double i_spot, double i_maturity) const
+	double Sboundaries::space_mesh() const
 	{
-		double S_max = s_boundary_right(i_spot, i_maturity);
-		double S_min = s_boundary_left(i_spot, i_maturity);
+		double S_max = s_boundary_right();
+		double S_min = s_boundary_left();
 		return floor((S_max-S_min)/dx);	
 	}
 
@@ -34,10 +34,10 @@ namespace dauphine
     		return t;
 	}
 
-	double Tboundaries::time_mesh(double i_maturity) const
+	double Tboundaries::time_mesh() const
 	{
-		double T_max = t_boundary_right(i_maturity);
-		double T_min = t_boundary_left(T_max);
+		double T_max = t_boundary_right(maturity);
+		double T_min = t_boundary_left(T_max); //argu nécessaire dans la fonction?
 		return (T_max-T_min)/dt;
 	
 	}

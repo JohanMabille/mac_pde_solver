@@ -12,9 +12,7 @@ namespace dauphine
     {
     public:
 	explicit rate(Space_boundaries* sb,
-                  Time_boundaries* tb,
-                  double i_spot,
-                  double i_maturity);
+                      Time_boundaries* tb);
         virtual ~rate();
        	virtual double get_rate(double s, double t) const; 
 	virtual void rate_build() = 0;
@@ -33,9 +31,7 @@ namespace dauphine
   
     public:
         rate_cst(Space_boundaries* sb,
-                 Time_boundaries* tb,
-                 double i_spot,
-                 double i_maturity);
+                 Time_boundaries* tb);
         ~rate_cst();
        	void rate_build() override;
     };

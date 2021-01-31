@@ -10,8 +10,9 @@ namespace dauphine
 
 	fdm_interface::~fdm_interface()
 	{
-		delete m_pde;
+		delete m_pde; //destruction du pointeur
 		delete m_payoff;
+
 	}
 
 	double fdm_interface::a1(pde* pde, double s, double t) const
@@ -75,37 +76,36 @@ namespace dauphine
         pde* pde = fdm::m_pde;
         payoff* payoff = fdm::m_payoff;
         rate* r = pde->get_rate();
-      
         pde->get_volatility()->vol_build(volatility_eps); // recalculating the volatility matrix due to the fact that we might have a change in volatility_eps
         Space_boundaries* sb =pde->get_volatility()->get_sboundaries();
         Time_boundaries* tb=  pde->get_volatility()->get_tboundaries();
-        double Smax = exp(sb->s_boundary_right()); // do the same as before, remove boudaries from parameters, they already exist within fdm
+        double Smax = exp(sb->s_boundary_right());
         double Smin = exp(sb->s_boundary_left());
         
-
+        
 		//Calcul avec FDM
 		//1. On discretise le temps et l'espace
-        std::size_t T = tb->time_mesh(i_maturity);
-        std::size_t N = sb->space_mesh(i_spot, i_maturity);
-        double r0 = initial_rate;
+        std::size_t T = tb->time_mesh();
+        std::size_t N = sb->space_mesh();
+	double r0 = initial_rate;
 
 		//2. Calcul des f intermédiaires
 			
 		//Calcul de la matrice F en T
         
-        std::vector<double> F(N-1);
-        double S = Smin;
+	std::vector<double> F(N-1);
+	double S = Smin;
 	
-        for (std::size_t i = 0; i < F.size(); i++)      //why strictly smaller?
+	for (std::size_t i = 0; i < F.size(); i++)      //why strictly smaller?
         { 
             //maybe store the spots?
             F[i] = payoff->get_payoff(S);
-            S = S * exp(dx);
-        }
+	    S = S * exp(dx);
+  	}
         
         	
 		//Calcul des coeffs des matrices tridiagonales en T
-		double mat = i_maturity;
+		double mat = maturity;
 		//def matrice des coeffs pour avoir les coeffs en tt pt de l espace
 		std::vector<double> A1(N-1, 0.0);
 		std::vector<double> A2(N-1, 0.0);
@@ -187,7 +187,7 @@ namespace dauphine
 
 	double fdm::get_price(std::vector<double> price_list) const
 	{
-		double p = price_list[floor((price_list.size()/2) + 1)];
+		double p = price_list[floor((price_list.size() )/2+1)];
 		return p;
 	
 	}
@@ -245,9 +245,9 @@ namespace dauphine
         }
         return delta_surface;
     }
-    std::vector<double> fdm::get_delta_curve() const // TODO enable the selection of a specific time period, currently always last time step
+    std::vector<double> fdm::get_delta_curve() const
     {
-        return fdm::get_delta_surface().back(); //get the last one with pop_back
+        return fdm::get_delta_surface().back(); //get the last one with back()
     }
 
     double fdm::get_delta() const
@@ -257,10 +257,8 @@ namespace dauphine
     double delta = get_price(delta_curve);
 
 
-        double delta = get_price(alpha_curve);
-
-        return delta;
-    }
+    return delta;
+}
 
 std::vector<std::vector<double>> fdm::get_gamma_surface() const{
     std::vector<std::vector<double>> delta_surface = get_delta_surface();
@@ -270,7 +268,7 @@ std::vector<std::vector<double>> fdm::get_gamma_surface() const{
         std::vector<double> gamma_curve(delta_curve.size()-1, 0);
         std::transform(delta_curve.begin(), delta_curve.end()-1, delta_curve.begin()+1, gamma_curve.begin(), [&](double l, double r)
         {
-            return (r - l)/exp(dx);       //To test
+            return (r - l)/exp(dx);
         });
         gamma_surface.push_back(gamma_curve);
     }
@@ -279,15 +277,15 @@ std::vector<std::vector<double>> fdm::get_gamma_surface() const{
     std::vector<double> fdm::get_gamma_curve() const
     {
         return fdm::get_gamma_surface().back();
-
     }
 
 
        double fdm::get_gamma() const
     {
-        std::vector<double> gamma_curve = get_gamma_curve(spot, maturity);
+        std::vector<double> gamma_curve = get_gamma_curve();
 
         double gamma = get_price(gamma_curve);
+
 
         return gamma;
     }
@@ -298,7 +296,6 @@ std::vector<std::vector<double> > fdm_interface::transpose(std::vector<std::vect
         return std::vector<std::vector<double> >();
 
     std::vector<std::vector<double> > trans_vec(b[0].size(), std::vector<double>());
-
 
     for (int i = 0; i < b.size(); i++)
     {
@@ -329,9 +326,9 @@ std::vector<std::vector<double>> fdm::get_theta_surface() const
     }
     return theta_surface;
 }
-std::vector<double> fdm::get_theta_curve() const // TODO enable the selection of a specific time period, currently always last time step
+std::vector<double> fdm::get_theta_curve() const // we always last time step
 {
-    return fdm::get_theta_surface().back(); //get the last one with pop_back
+    return fdm::get_theta_surface().back(); //get the last one with back()
 }
 
 std::vector<double> fdm::get_vega_curve() const
@@ -353,68 +350,5 @@ std::vector<double> fdm::get_vega_curve() const
     return vega_curve;
 }
 
-//
-//    double fdm::get_theta(pde* t_pde,
-//                          interface* opt,
-//                          payoff* payoff,
-//                          Space_boundaries* sb,
-//                          Time_boundaries* tb) const
-//    {
-//        double t_plus = maturity + 0.003;
-//        double t_minus = maturity - 0.003;
-//
-//        interface* opt_plus = new interface(*opt);
-//        opt_plus->set_maturity(t_plus);
-//
-//        interface* opt_minus = new interface(*opt);
-//        opt_minus->set_maturity(t_minus);
-//
-//        pde* pde_plus = new bs_pde(opt_plus);
-//        pde* pde_minus = new bs_pde(opt_minus);
-//
-//        double p_plus = get_price(pde_plus, opt_plus, payoff, sb, tb);
-//        double p_minus = get_price(pde_minus, opt_minus, payoff, sb, tb);
-//        std::cout << p_plus << std::endl;
-//        std::cout << p_minus << std::endl;
-//
-//        delete pde_plus;
-//        delete pde_minus;
-//        delete opt_plus;
-//        delete opt_minus;
-//
-//        return (p_plus - p_minus)/0.006;
-//    }
-
-//
-//    double fdm::get_vega(pde* t_pde,
-//                          interface* opt,
-//                          payoff* payoff,
-//                          Space_boundaries* sb,
-//                          Time_boundaries* tb) const
-//    {
-//        volatility* sig_plus = new vol_cst(opt->get_vol(0., 0.) + 0.01);
-//        volatility* sig_minus = new vol_cst(opt->get_vol(0., 0.) - 0.01);
-//
-//        interface* opt_plus = new interface(*opt);
-//        opt_plus->set_vol(sig_plus);
-//
-//        interface* opt_minus = new interface(*opt);
-//        opt_minus->set_vol(sig_minus);
-//
-//        pde* pde_plus = new bs_pde(opt_plus);
-//        pde* pde_minus = new bs_pde(opt_minus);
-//
-//        double p_plus = get_price(pde_plus, opt_plus, payoff, sb, tb);
-//        double p_minus = get_price(pde_minus, opt_minus, payoff, sb, tb);
-//        std::cout << p_plus << std::endl;
-//        std::cout << p_minus << std::endl;
-//
-//        delete pde_plus;
-//        delete pde_minus;
-//        delete opt_plus;
-//        delete opt_minus;
-//
-//        return (p_plus - p_minus)/0.02;
-//    }
 
 }
