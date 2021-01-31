@@ -81,11 +81,8 @@ namespace dauphine
         Time_boundaries* tb=  pde->get_volatility()->get_tboundaries();
         double Smax = exp(sb->s_boundary_right()); // do the same as before, remove boudaries from parameters, they already exist within fdm
         double Smin = exp(sb->s_boundary_left());
-        //double Smax = exp(sb->s_boundary_right());
-        //double Smin = exp(sb->s_boundary_left());
-//        double Tmax = tb->t_boundary_right(maturity);   //unused?
-//        double Tmin = tb->t_boundary_left(maturity);
-//
+        
+        
 		//Calcul avec FDM
 		//1. On discretise le temps et l'espace
         std::size_t T = tb->time_mesh();
@@ -128,7 +125,7 @@ namespace dauphine
 			B2[i] = b2(pde, S, mat, r);
 			B3[i] = b3(pde, S, mat);
 		
-			S = S *exp(-dx);
+			S = S *exp(-dx);        //check again
 		}
 
 		//Calcul du terme constant que l'on extrait pour avoir une matrice tridiagonale
@@ -149,10 +146,10 @@ namespace dauphine
 		}
 
 		//On remonte via l'algorithme de Thomas
-		S = Smax;
+		//S = Smax;
         std::vector<std::vector<double>> return_F;
 		for (int t = T-1; t>=0 ; t--)
-		{
+		{   S = Smax;
 			//Pour chaque x(i,t+1), en commencant par f_N, on remonte à x(i,t)
 			//via l'algo de Thomas et le système trouvé
 			
@@ -338,16 +335,16 @@ std::vector<double> fdm::get_vega_curve() const
 {
     std::vector<double> prices;
     std::vector<double> vol;
-    for (int eps = -20; eps<20; eps++){
+    for (int eps = -10; eps<10; eps++){
         std::vector<std::vector<double>> p_surface = get_price_list(eps);
         int t = p_surface.size()-1;
         int s = floor((p_surface[t].size() )/2+1);
         prices.push_back(p_surface[t][s]);
-        vol.push_back(fdm::m_pde->get_volatility()->get_sigma(s, t));
+        vol.push_back(fdm::m_pde->get_volatility()->get_sigma_by_index(s, t));
     }
     std::vector<double> vega_curve;
     for(int i =  0; i<prices.size()-1;i++){
-        vega_curve.push_back((prices[i]-prices[i+1])/(vol[i]-vol[i+1]));
+        vega_curve.push_back((prices[i+1]-prices[i])/(vol[i+1]-vol[i]));
     }
     
     return vega_curve;
@@ -384,7 +381,7 @@ std::vector<double> fdm::get_vega_curve() const
 //
 //        return (p_plus - p_minus)/0.006;
 //    }
-//
+
 //
 //    double fdm::get_vega(pde* t_pde,
 //                          interface* opt,

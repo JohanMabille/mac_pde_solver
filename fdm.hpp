@@ -10,7 +10,6 @@
 #include "pde.hpp"
 #include "payoff.hpp"
 #include "pde_boundary_conditions.hpp"
-#include "interface.hpp"
 #include "global.hpp"
 #include "rate.hpp"
 

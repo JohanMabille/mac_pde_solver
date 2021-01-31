@@ -1,7 +1,6 @@
 #ifndef PDE_BOUNDARY_CONDITIONS_HPP
 #define PDE_BOUNDARY_CONDITIONS_HPP
 
-#include "interface.hpp"
 #include "global.hpp"
 
 #include <stdio.h>
