@@ -1,11 +1,9 @@
 #ifndef GLOBAL_HPP
 #define GLOBAL_HPP
 
-#include <iostream>
-
-
 namespace dauphine
 {
+
 
     static double initial_sigma = 0.20;
     static double initial_rate = 0.02;
@@ -17,5 +15,8 @@ namespace dauphine
     static double dx = 0.01;
     static double theta = 0.5;
 
+
+
 }
+
 #endif

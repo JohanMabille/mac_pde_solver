@@ -10,10 +10,12 @@ namespace dauphine{
     		, nb_rows(sb->space_mesh())
 
 	{
+		std::cout << "constructeur rate" << std::endl;
 	}
 
 	rate::~rate()
 	{
+		std::cout << "destructeur rate" << std::endl;
 	}
 
 
@@ -32,16 +34,16 @@ namespace dauphine{
 	
 
 	rate_cst::rate_cst(Space_boundaries* sb,
-                       Time_boundaries* tb,
-                       double i_spot,
-                       double i_maturity)
-    	: rate(sb, tb, i_spot, i_maturity)
+                     Time_boundaries* tb)
+    	: rate(sb, tb)
     	{
         	rate_build();
+        	std::cout << "constructeur rate cst" << std::endl;
     	}
 
     	rate_cst::~rate_cst()
     	{
+        	std::cout << "destructeur rate cst" << std::endl;
     	}
 
     	void rate_cst::rate_build()

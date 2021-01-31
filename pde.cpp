@@ -5,22 +5,26 @@ namespace dauphine
     
     pde::pde()
     {
+        std::cout<<"PDE constructor"<<std::endl;
     }
 
     pde::~pde()
     {
+        std::cout<<"PDE destructor"<<std::endl;
     }
 
     bs_pde::bs_pde(volatility* vol, rate* r)
     : m_vol(vol), m_rate(r)
     {
+        std::cout<<"BS PDE constructor"<<std::endl;
     }
 
 
     bs_pde::~bs_pde()
     {
         m_vol = nullptr;
-        m_rate = nullptr;
+	m_rate = nullptr;
+        std::cout<<"BS PDE destructor"<<std::endl;
     }
 
     double bs_pde::first_coeff() const

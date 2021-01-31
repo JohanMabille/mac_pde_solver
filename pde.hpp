@@ -34,8 +34,7 @@ namespace dauphine
         
     public:
         
-        bs_pde(volatility* vol, rate* r);
-
+        bs_pde(volatility* vol, rate* r); 
         virtual ~bs_pde();
         
         double first_coeff() const override;
