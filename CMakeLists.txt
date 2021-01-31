@@ -23,7 +23,6 @@ endif()
 set(PDE_SOLVER_SRCS
     closed_form.cpp
     fdm.cpp
-    interface.cpp
     payoff.cpp
     pde_boundary_conditions.cpp
     pde.cpp
