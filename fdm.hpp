@@ -47,8 +47,10 @@ namespace dauphine
 
         virtual std::vector<std::vector<double>> get_theta_surface() const = 0;
         virtual std::vector<double> get_theta_curve() const = 0;
+        virtual double get_theta() const = 0 ;
         
         virtual std::vector<double> get_vega_curve() const =0;
+        virtual double get_vega() const = 0;
 
 	
     	protected:
@@ -79,11 +81,13 @@ namespace dauphine
         std::vector<std::vector<double>> get_gamma_surface() const override;
         std::vector<double> get_gamma_curve() const override;
         double get_gamma()const override;
-        
+
         std::vector<std::vector<double>> get_theta_surface() const override;
         std::vector<double> get_theta_curve() const override;
+        double get_theta() const override;
+        
         std::vector<double> get_vega_curve() const override;
-
+        double get_vega() const override;
 	
     };
 

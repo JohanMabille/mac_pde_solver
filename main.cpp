@@ -35,16 +35,6 @@ namespace dauphine {
 
     void test()
     {
-        static double initial_sigma = 0.20;
-        static double initial_rate = 0.02;
-        static double spot = 100.;
-        static double maturity = 0.25;
-        static double f0 = 1.;
-        static double fN = 250.;
-        static double dt = 0.01;
-        static double dx = 0.01;
-        static double theta = 0.5;
-        
         Space_boundaries* sb = new Sboundaries();
         Time_boundaries* tb = new Tboundaries();
         
@@ -63,62 +53,91 @@ namespace dauphine {
         fdm_interface* f = new fdm(eq, c);
         
         
-	        
+            
         std::cout << "Payoff: " << c->get_payoff(spot) << std::endl;
         
 
-    //	std::vector<std::vector<double>> price_list = f->get_price_list();       //delete redundancy of eq, c and r
-    //    std::cout << "Price List: " << std::endl;
-    //        for (std::size_t i=0; i<price_list[price_list.size()-1].size(); i++)
-    //	{
-    //        std::cout << price_list[price_list.size()-1][i] << std::endl;
-    //
-    //	}
-        
         std::vector<std::vector<double>> price_list = f->get_price_list();
+       
+//                //Print Price List
+//                std::cout << "Price List: " << std::endl;
+//                    for (std::size_t i=0; i<price_list[price_list.size()-1].size(); i++)
+//                { //we print the price list at the last time step.
+//                    std::cout << price_list[price_list.size()-1][i];
+//                    std::cout << "\t";
+//                }
+//                std::cout<<std::endl;
+
+
+
+//                //Price Surface
+//                std::cout << "Price Surface: " << std::endl;
+//                for(int t =  0; t<price_list.size();t++){
+//                    std::cout<<t<<"\t";
+//                    for (std::size_t i=0; i<price_list[t].size(); i++)
+//                    {
+//                        std::cout << price_list[t][i] << "\t";
+//                    }
+//                    std::cout<<std::endl;
+//                }
+//                std::cout<<std::endl;
+        
         std::cout << "Price at the input Spot: " << f->get_price(price_list[price_list.size()-1]) << std::endl;
             
         std::cout << "BS Price: " << bs_price(spot, user_strike, initial_sigma, maturity, true) << std::endl;
         
-            std::vector<double> delta_surface = f->get_delta_curve();
-        std::cout << "Delta: " << f->get_price(delta_surface) << std::endl;
-            
-        
-        
-
-        
-    
-//
+//        //Printing the delta curve
+//        std::vector<double> delta_curve = f->get_delta_curve();
 //        std::cout << "Delta: " << std::endl;
-//        for (std::size_t i=0; i<delta_surface.size(); i++)
+//        for (std::size_t i=0; i<delta_curve.size(); i++)
 //        {
 //            std::cout << delta_surface[i] << std::endl;
 //
 //        }
         
-        std::vector<double> gamma_curve = f->get_gamma_curve();
-        std::cout << "Gamma Spot: " << f->get_price(gamma_curve) << std::endl;
         
+        
+//        //EXAMPLE of printing out a GREEK SURFACE, in this case Delta.
+//        std::vector<std::vector<double>> delta_surface = f->get_delta_surface();
+//        std::cout << "Delta Surface: " << std::endl;
+//        for(int t =  0; t<delta_surface.size();t++){
+//            std::cout<<t<<"\t";
+//            for (std::size_t i=0; i<delta_surface[t].size(); i++)
+//            {
+//                std::cout << delta_surface[t][i] << "\t";
+//            }
+//            std::cout<<std::endl;
+//        }
+        
+        std::cout << "Delta Spot: " << f->get_delta() << std::endl;
+        
+    
+
+        //Gamma curve
+//        std::vector<double> gamma_curve = f->get_gamma_curve();
 //        std::cout << "Gamma: " << std::endl;
 //        for (std::size_t i=0; i<gamma_curve.size(); i++)
 //        {
 //            std::cout << gamma_curve[i] << std::endl;
 //
 //        }
+
+        std::cout << "Gamma Spot: " << f->get_gamma() << std::endl;
         
-        std::vector<double> theta_surface = f->get_theta_curve();
-        
+        //Theta curve
+//        std::vector<double> theta_curve = f->get_theta_curve();
 //        std::cout << "Theta: " << std::endl;
 //        for (std::size_t i=0; i<theta_surface.size(); i++)
 //        {
-//            std::cout << theta_surface[i] << std::endl;
+//            std::cout << theta_curve[i] << std::endl;
 //
 //        }
         
         
-        std::cout << "Theta Spot: " << f->get_price(theta_surface) << std::endl;
+        std::cout << "Theta Spot: " << f->get_theta() << std::endl;
 
-        std::vector<double> vega_curve = f->get_vega_curve();
+//        std::vector<double> vega_curve = f->get_vega_curve();
+        
 //        std::cout << "Vega: " << std::endl;
 //        for (std::size_t i=0; i<vega_curve.size(); i++)
 //        {
@@ -126,7 +145,7 @@ namespace dauphine {
 //
 //        }
         
-        std::cout << "Vega Spot: " << f->get_price(vega_curve) << std::endl;
+        std::cout << "Vega Spot: " << f->get_vega() << std::endl;
         
 
 
@@ -138,7 +157,6 @@ namespace dauphine {
         delete sb;
         delete r;
         delete vol;
-
     }
 }
 

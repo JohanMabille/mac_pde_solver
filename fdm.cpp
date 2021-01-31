@@ -331,6 +331,13 @@ std::vector<double> fdm::get_theta_curve() const // we always last time step
     return fdm::get_theta_surface().back(); //get the last one with back()
 }
 
+double fdm::get_theta() const
+{
+    std::vector<double> theta_curve = get_theta_curve();
+    double theta = get_price(theta_curve);
+    return theta;
+}
+
 std::vector<double> fdm::get_vega_curve() const
 {
     std::vector<double> prices;
@@ -350,5 +357,11 @@ std::vector<double> fdm::get_vega_curve() const
     return vega_curve;
 }
 
+    double fdm::get_vega() const
+      {
+          std::vector<double> vega_curve = get_vega_curve();
+          double vega = get_price(vega_curve);
+          return vega;
+      }
 
 }
