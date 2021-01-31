@@ -29,23 +29,27 @@ namespace dauphine
 		virtual double b3(pde* pde, double s, double t) const;
 		
         virtual std::vector<double> thomas(const std::vector<double> a, const std::vector<double> b, const std::vector<double> c,  std::vector<double> d) const = 0;
-        
-        virtual std::vector<double> get_price_list(double i_spot, double i_maturity) const = 0;
+
+        virtual std::vector<std::vector<double>> get_price_list(double volatility_eps=0) const = 0;
 
         virtual double get_price(std::vector<double> price_list) const = 0;
 
         
-        virtual std::vector<double> get_delta_curve(double i_spot, double i_maturity) const = 0;
+        virtual std::vector<std::vector<double>> get_delta_surface() const  =0;
+        virtual std::vector<double> get_delta_curve() const = 0;
         virtual double get_delta() const = 0 ;
+        
+        virtual std::vector<std::vector<double>> get_gamma_surface() const = 0;
+        virtual std::vector<double> get_gamma_curve() const = 0;
 
-        virtual std::vector<double> get_gamma_curve(double i_spot, double i_maturity) const = 0;
         virtual double get_gamma() const = 0 ;
+        
+        std::vector<std::vector<double>> transpose(std::vector<std::vector<double>> b) const;
 
-        virtual std::vector<double> get_theta_curve(double i_spot, double i_maturity) const = 0;
-        virtual double get_theta() const = 0;
-
-        virtual std::vector<double> get_vega_curve() const = 0;
-        virtual double get_vega() const = 0;
+        virtual std::vector<std::vector<double>> get_theta_surface() const = 0;
+        virtual std::vector<double> get_theta_curve() const = 0;
+        
+        virtual std::vector<double> get_vega_curve() const =0;
 
 	
     	protected:
@@ -64,22 +68,23 @@ namespace dauphine
                                    const std::vector<double> c,
                                    std::vector<double> d) const override;
 		
-		std::vector<double> get_price_list(double i_spot, double i_maturity) const override;
+		std::vector<std::vector<double>> get_price_list(double volatility_eps=0) const override; //optional parameter
 
 		double get_price(std::vector<double> price_list) const override;
         
         
-        std::vector<double> get_delta_curve(double i_spot, double i_maturity) const override;
-        double get_delta() const override;
+        std::vector<std::vector<double>> get_delta_surface() const override;
+        std::vector<double> get_delta_curve()const override;
+        double get_delta()const override;
         
-        std::vector<double> get_gamma_curve(double i_spot, double i_maturity) const override;
-        double get_gamma() const override;
+        std::vector<std::vector<double>> get_gamma_surface() const override;
+        std::vector<double> get_gamma_curve() const override;
+        double get_gamma()const override;
         
-        std::vector<double> get_theta_curve(double i_spot, double i_maturity) const override;
-        double get_theta() const override;
-
+        std::vector<std::vector<double>> get_theta_surface() const override;
+        std::vector<double> get_theta_curve() const override;
         std::vector<double> get_vega_curve() const override;
-        double get_vega() const override;
+
 
 	
     };

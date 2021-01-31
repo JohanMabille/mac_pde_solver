@@ -22,7 +22,9 @@ namespace dauphine
     protected:
 	std::vector<double> m_rate;
         int nb_rows;
-        int nb_cols;    
+        int nb_cols;
+        Space_boundaries* s_boundaries;
+        Time_boundaries* t_boundaries;
     };
 
 
