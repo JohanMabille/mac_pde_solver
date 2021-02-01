@@ -17,8 +17,14 @@ namespace dauphine
         
         explicit pde();
         virtual ~pde();
+
+        // Entity semantic:
+        pde(const pde&) = delete;
+        pde& operator=(const pde&) = delete;
+        pde(pd&&) = delete;
+        pde& operator=(pde&&) = delete;
         
-        // PDE Coefficients
+        // PDE Coefficients <= should be the name of the class (more explicit than pde)
         virtual double first_coeff() const = 0;
         virtual double diff_coeff(double s, double t) const = 0;
         virtual double conv_coeff(double s, double t) const = 0;

@@ -23,6 +23,7 @@ namespace dauphine
         m_rate = nullptr;
     }
 
+    // This should actually be part of boundary conditions
     double bs_pde::first_coeff() const
     {
         return 1.;
