@@ -12,6 +12,13 @@
 
 namespace dauphine
 {
+    // There is a confusion with mesh boudaries.
+    // Boundary conditions are the way you fill
+    // the boundaries of the matrix system you
+    // will solve.
+    // The Space_boundaries and Time_boundaries
+    // could be gathered into a single class
+    // class pde_grid for instance.
 	class Space_boundaries
     	{
    	public:
