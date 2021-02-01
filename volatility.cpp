@@ -11,7 +11,6 @@ namespace dauphine
     , nb_cols(tb->time_mesh())
     , nb_rows(sb->space_mesh())
     {
-		std::cout << "constructeur vol" << std::endl;
 	}
 
     Space_boundaries* volatility::get_sboundaries(){
@@ -25,7 +24,6 @@ namespace dauphine
 	volatility::~volatility()
 	{
         m_volatility.clear();
-        std::cout << "destructeur vol" << std::endl;
 	}
     
     double volatility::get_sigma(double s, double t) const
@@ -49,12 +47,10 @@ namespace dauphine
     : volatility(sb, tb)
     {
         vol_build();
-        std::cout << "constructeur vol cst" << std::endl;
     }
 
     vol_cst::~vol_cst()
     {
-        std::cout << "destructeur vol cst" << std::endl;
     }
 
     void vol_cst::vol_build(double eps)

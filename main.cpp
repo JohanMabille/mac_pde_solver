@@ -33,7 +33,7 @@
 namespace dauphine {
 
 
-    void test()
+    void call_price()
     {
         Space_boundaries* sb = new Sboundaries();
         Time_boundaries* tb = new Tboundaries();
@@ -164,7 +164,7 @@ namespace dauphine {
 
 int main(int argc, const char * argv[])
 {
-    dauphine::test();
+    dauphine::call_price();
     return 0;
 }
 
