@@ -18,6 +18,15 @@ namespace dauphine
 	public: //Constructeurs et destructeurs virtuels
         explicit payoff();
         virtual ~payoff();
+
+        // Entity semantic:
+        payoff(const payoff&) = delete;
+        payoff& operator=(const payoff&) = delete;
+        payoff(payoff&&) = delete;
+        payoff& operator=(payoff&&) = delete;
+
+        // This method is not supposed modify the internal state
+        // of the class, should be const
         virtual double get_payoff(const double S) = 0;
     };
 
