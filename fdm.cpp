@@ -10,9 +10,8 @@ namespace dauphine
 
 	fdm_interface::~fdm_interface()
 	{
-		delete m_pde; //destruction du pointeur
-		delete m_payoff;
-
+        m_pde = nullptr;
+        m_payoff = nullptr;
 	}
 
 	double fdm_interface::a1(pde* pde, double s, double t) const
@@ -96,12 +95,12 @@ namespace dauphine
 	std::vector<double> F(N-1);
 	double S = Smin;
 	
-	for (std::size_t i = 0; i < F.size(); i++)      //why strictly smaller?
+	for (std::size_t i = 0; i < F.size(); i++)
         { 
             //maybe store the spots?
             F[i] = payoff->get_payoff(S);
-	    S = S * exp(dx);
-  	}
+            S = S * exp(dx);
+        }
         
         	
 		//Calcul des coeffs des matrices tridiagonales en T
@@ -185,7 +184,7 @@ namespace dauphine
         
 	}
 
-	double fdm::get_price(std::vector<double> price_list) const
+	double fdm::get_price(std::vector<double>& price_list) const
 	{
 		double p = price_list[floor((price_list.size() )/2+1)];
 		return p;
@@ -193,10 +192,10 @@ namespace dauphine
 	}
 
 
-	std::vector<double> fdm::thomas(const std::vector<double> a,
-                                    const std::vector<double> b,
-                                    const std::vector<double> c,
-                                    std::vector<double> d) const
+	std::vector<double> fdm::thomas(const std::vector<double>& a,
+                                    const std::vector<double>& b,
+                                    const std::vector<double>& c,
+                                    std::vector<double>& d) const
 	{
 		//algo de Thomas pour inverser une matrice tridiagonale dans le cas de coeffs "constant" dans l'espace		
         std::size_t n = d.size();
@@ -326,36 +325,38 @@ std::vector<std::vector<double>> fdm::get_theta_surface() const
     }
     return theta_surface;
 }
-std::vector<double> fdm::get_theta_curve() const // we always last time step
-{
-    return fdm::get_theta_surface().back(); //get the last one with back()
-}
-
-double fdm::get_theta() const
-{
-    std::vector<double> theta_curve = get_theta_curve();
-    double theta = get_price(theta_curve);
-    return theta;
-}
-
-std::vector<double> fdm::get_vega_curve() const
-{
-    std::vector<double> prices;
-    std::vector<double> vol;
-    for (int eps = -10; eps<10; eps++){
-        std::vector<std::vector<double>> p_surface = get_price_list(eps);
-        int t = p_surface.size()-1;
-        int s = floor((p_surface[t].size() )/2+1);
-        prices.push_back(p_surface[t][s]);
-        vol.push_back(fdm::m_pde->get_volatility()->get_sigma_by_index(s, t));
+    std::vector<double> fdm::get_theta_curve() const // we always last time step
+    {
+        return fdm::get_theta_surface().back(); //get the last one with back()
     }
-    std::vector<double> vega_curve;
-    for(int i =  0; i<prices.size()-1;i++){
-        vega_curve.push_back((prices[i+1]-prices[i])/(vol[i+1]-vol[i]));
+
+    double fdm::get_theta() const
+    {
+        std::vector<double> theta_curve = get_theta_curve();
+        double theta = get_price(theta_curve);
+        return theta;
     }
-    
-    return vega_curve;
-}
+
+    std::vector<double> fdm::get_vega_curve() const
+    {
+        std::vector<double> prices;
+        std::vector<double> vol;
+        for (int eps = -10; eps<10; eps++)
+        {
+            std::vector<std::vector<double>> p_surface = get_price_list(eps);
+            int t = p_surface.size()-1;
+            int s = floor((p_surface[t].size() )/2+1);
+            prices.push_back(p_surface[t][s]);
+            vol.push_back(fdm::m_pde->get_volatility()->get_sigma_by_index(s, t));
+        }
+        std::vector<double> vega_curve;
+        for(int i =  0; i<prices.size()-1;i++)
+        {
+            vega_curve.push_back((prices[i+1]-prices[i])/(vol[i+1]-vol[i]));
+        }
+        
+        return vega_curve;
+    }
 
     double fdm::get_vega() const
       {

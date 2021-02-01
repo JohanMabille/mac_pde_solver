@@ -28,11 +28,11 @@ namespace dauphine
 		virtual double b2(pde* pde, double s, double t, rate* r) const;
 		virtual double b3(pde* pde, double s, double t) const;
 		
-        virtual std::vector<double> thomas(const std::vector<double> a, const std::vector<double> b, const std::vector<double> c,  std::vector<double> d) const = 0;
+        virtual std::vector<double> thomas(const std::vector<double>& a, const std::vector<double>& b, const std::vector<double>& c,  std::vector<double>& d) const = 0;
         
         virtual std::vector<std::vector<double>> get_price_list(double volatility_eps=0) const = 0;
 
-        virtual double get_price(std::vector<double> price_list) const = 0;
+        virtual double get_price(std::vector<double>& price_list) const = 0;
 
         
         virtual std::vector<std::vector<double>> get_delta_surface() const  =0;
@@ -64,14 +64,14 @@ namespace dauphine
 		fdm(pde* pde, payoff* payoff);
 		~fdm();
 
-		std::vector<double> thomas(const std::vector<double> a,
-                                   const std::vector<double> b,
-                                   const std::vector<double> c,
-                                   std::vector<double> d) const override;
+		std::vector<double> thomas(const std::vector<double>& a,
+                                   const std::vector<double>& b,
+                                   const std::vector<double>& c,
+                                   std::vector<double>& d) const override;
 		
 		std::vector<std::vector<double>> get_price_list(double volatility_eps=0) const override; //optional parameter
 
-		double get_price(std::vector<double> price_list) const override;
+		double get_price(std::vector<double>& price_list) const override;
         
         
         std::vector<std::vector<double>> get_delta_surface() const override;
