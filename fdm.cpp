@@ -1,5 +1,7 @@
 #include "fdm.hpp"
 
+#include <algorithm>
+
 namespace dauphine
 {
 
