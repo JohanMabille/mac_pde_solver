@@ -199,6 +199,10 @@ namespace dauphine
                                     const std::vector<double>& c,
                                     std::vector<double>& d) const
 	{
+            // consider passing new_coeffs and y as additional
+            // parameter to avoid allocating new vectors here
+            // (they will be allocated / freed in each iteration of
+            // the solver's loop)
 		//algo de Thomas pour inverser une matrice tridiagonale dans le cas de coeffs "constant" dans l'espace		
         std::size_t n = d.size();
 		std::vector<double> new_coeffs(n, 0);
@@ -206,6 +210,7 @@ namespace dauphine
 
 		//Forward sweep
 		new_coeffs[0] =c[0]/b[0];
+                // new_d can be computed in d to avoid allocating a new vector
 		new_d[0] = d[0]/b[0];
 
 		for (std::size_t i=1; i<n; i++)
@@ -235,6 +240,10 @@ namespace dauphine
 
         // Defined a transform function to calculate the difference between the prices (vectors) divided by dx
         std::vector<std::vector<double>> delta_surface;
+        // We usually need the delta at T = 0 only, no need to compute it for the whole
+        // time axis.
+        // A centered finite difference (i.e. (p[i+1] - p[i-1])/2exp(dx)) would give more
+        // accurate results
         for(int i=0; i < p_surface.size(); i++){ // iterating over the time axis of the price surface
             std::vector<double> p_curve = p_surface[i];
             std::vector<double> d_curve(p_curve.size()-1, 0);
