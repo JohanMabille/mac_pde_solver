@@ -38,6 +38,9 @@ namespace dauphine {
         Space_boundaries* sb = new Sboundaries();
         Time_boundaries* tb = new Tboundaries();
         
+        // It would have been more consistent to have the strike
+        // with other inputs rather than asking the user to
+        // enter it (and only this one).œ
         std::cout << "Please enter your strike " << std::endl;
         double user_strike = 0;
         std::cin >> user_strike;
@@ -84,7 +87,10 @@ namespace dauphine {
         
         std::cout << "Price at the input Spot: " << f->get_price(price_list[price_list.size()-1]) << std::endl;
             
-        std::cout << "BS Price: " << bs_price(spot, user_strike, initial_sigma, maturity, true) << std::endl;
+        //std::cout << "BS Price: " << bs_price(spot, user_strike, initial_sigma, maturity, true) << std::endl;
+        // The bs_price formula is the non discouted function of the forward.
+        double df = std::exp(-initial_rate * maturity);
+        std::cout << "BS Price: " << df * bs_price(spot / df, user_strike, initial_sigma, maturity, true) << std::endl;
         
 //        //Printing the delta curve
 //        std::vector<double> delta_curve = f->get_delta_curve();
