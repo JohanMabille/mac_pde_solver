@@ -18,6 +18,11 @@ namespace dauphine
 
     	call::~call()
     	{
+            // Not necessary, strike is
+            // a stack-allocated variable
+            // We usually reset heap-allocated
+            // variables to state that the class
+            // does not have the ownership
        		strike = 0;
    	 }
 

@@ -15,6 +15,12 @@
 
 namespace dauphine
 {
+    // Same remark as for the rate class:
+    // 1] Entity semantics not properly defined
+    // 2] get_sigma methods should be virtual pure,
+    //    with specific implementation in inheriting classes
+    // 3] Data members stored in this class are specific
+    //    to non-const volatility
     class volatility
      {
      public:
@@ -23,6 +29,13 @@ namespace dauphine
          virtual ~volatility();
          virtual double get_sigma(double s, double t) const;
          virtual double get_sigma_by_index(int row, int column) const;
+         // The name does not really reflect what
+         // the method does. And you have to implement the same
+         // method in all the potential inheriting classes
+         // A better approach would be to implement a bump_volatility
+         // class that applies the bump after asking for the original
+         // volatility. It also has the advantage of not changing
+         // the undelying data.
          virtual void vol_build(double eps=0) = 0;  //allows the user to define the incremental change of the volatility as needed for the vega calculation
          Space_boundaries* get_sboundaries(); 
          Time_boundaries* get_tboundaries();
